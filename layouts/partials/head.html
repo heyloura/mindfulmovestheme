@@ -4,7 +4,7 @@
 {{ with site.Params.description }}<meta name="description" content="{{ . }}">{{ end }}
 {{- /* Home and Notice are pages only so they can be edited in Micro.blog; their
        words show up elsewhere. Keep search engines from listing them alone. */}}
-{{- if and .IsPage .Date.IsZero (in (slice "home" "notice") (partial "norm-title.html" .Title)) }}
+{{- if and (partial "is-standing-page.html" .) (in (slice "home" "notice") (partial "norm-title.html" .Title)) }}
 <meta name="robots" content="noindex">
 {{- end }}
 
