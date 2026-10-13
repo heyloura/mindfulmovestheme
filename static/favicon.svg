@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220">
+  <!-- The seal at favicon size: flat, eyes dropped, strokes thickened. Follows
+       the browser's day/night setting, like the site. -->
+  <style>
+    .r { fill: #A62B22 }
+    .p { fill: #F4EFE4 }
+    .s { fill: none; stroke: #F4EFE4 }
+    @media (prefers-color-scheme: dark) {
+      .r { fill: #C9503F }
+      .p { fill: #191816 }
+      .s { stroke: #191816 }
+    }
+  </style>
+  <rect class="r" x="10" y="10" width="200" height="200" rx="14"/>
+  <path class="p" d="M110 30A80 80 0 0 0 110 190 40 40 0 0 0 110 110 40 40 0 0 1 110 30Z"/>
+  <circle class="s" cx="110" cy="110" r="80" stroke-width="18"/>
+</svg>
