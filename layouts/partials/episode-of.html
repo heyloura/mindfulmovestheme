@@ -16,7 +16,7 @@
 */}}
 {{- $page := . -}}
 {{- $out := false -}}
-{{- if not $page.Date.IsZero -}}
+{{- if eq $page.Type "post" -}}
   {{- range $page.Params.categories -}}
     {{- if not $out -}}
       {{- with partial "page-by-title.html" . -}}
