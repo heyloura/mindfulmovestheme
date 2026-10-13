@@ -6,16 +6,17 @@
   deliberate: titles are what you type in Micro.blog, while slugs go through
   urlize, which mangles punctuation ("Fun & Games" -> "fun--games").
 
-  Only undated regular pages with a file behind them count, so a blog post that
-  happens to be called "Classes" can never take over the class schedule, and a
-  category's own _index.md never stands in for its course page.
+  Only standing pages with a file behind them count (is-standing-page.html),
+  so a blog post that happens to be called "Classes" can never take over the
+  class schedule, and a category's own _index.md never stands in for its
+  course page. (Not "undated pages": Micro.blog dates its pages too.)
 
   Usage:  {{ with partial "page-by-title.html" "Notice" }}{{ .Content }}{{ end }}
 */}}
 {{- $want := partial "norm-title.html" . -}}
 {{- $found := false -}}
 {{- range site.Pages -}}
-  {{- if and (not $found) .IsPage .File .Date.IsZero (eq (partial "norm-title.html" .Title) $want) -}}
+  {{- if and (not $found) .File (partial "is-standing-page.html" .) (eq (partial "norm-title.html" .Title) $want) -}}
     {{- $found = . -}}
   {{- end -}}
 {{- end -}}
