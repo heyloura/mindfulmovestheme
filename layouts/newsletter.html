@@ -1,0 +1,80 @@
+{{- /*
+  The newsletter email. Micro.blog uses a theme's layouts/newsletter.html
+  unless a template is pasted into Newsletter → Settings, which wins.
+
+  This is NOT built by Hugo: Micro.blog fills it in when it sends, with plain
+  Go templates only (no Hugo functions), from these variables:
+    .Site.Title  .Site.BaseURL  .Site.Hostname  .Site.Params
+    .Subject  .Intro  .CustomCSS  .Footer.UnsubscribeURL  .Footer.MailingAddress
+    .Pages, each with .Title .Content .Plain .Summary .Permalink .Date .Params
+
+  Email clients are fussy, so styles are inline, the layout is one column,
+  and there's no SVG (the seal is a small red square, the one splash of red).
+
+  Video can't play in email and embeds are usually stripped, so every post
+  ends with a link to read or watch it on the site. An episode's card image
+  (class="card-image") is still in its content, so the picture shows here.
+
+  The freebie link (today: the cue card deck) comes from the theme settings
+  "newsletter_offer_label" / "newsletter_offer_url", so changing the offer
+  never means editing this template.
+*/ -}}
+<style>
+  .mm-email img { max-width: 100%; height: auto; }
+  .mm-email iframe, .mm-email video { display: none; }
+  .mm-email a { color: #1E1C1A; }
+  .mm-email blockquote { margin: 0 0 0 0; padding: 0 0 0 16px; border-left: 2px solid #CFC7B7; font-style: italic; }
+  {{ .CustomCSS }}
+</style>
+
+<div class="mm-email" style="background: #F4EFE4; padding: 28px 16px;">
+<div style="max-width: 600px; margin: 0 auto; font-family: Georgia, 'Times New Roman', serif; font-size: 18px; line-height: 1.6; color: #1E1C1A;">
+
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse: collapse;">
+    <tr>
+      <td style="width: 16px; height: 16px; background: #A62B22; font-size: 0; line-height: 0;">&nbsp;</td>
+      <td style="padding-left: 12px; font-size: 22px; font-weight: bold; line-height: 1.2;">
+        <a href="{{ .Site.BaseURL }}" style="color: #1E1C1A; text-decoration: none;">{{ .Site.Title }}</a>
+      </td>
+    </tr>
+  </table>
+
+  {{ if gt (len .Intro) 0 }}
+  <div style="margin-top: 24px;">{{ .Intro }}</div>
+  {{ end }}
+
+  <hr style="border: 0; border-top: 1px solid #CFC7B7; margin: 24px 0;">
+
+  {{ range .Pages }}
+  <div style="margin-bottom: 8px;">
+    {{ if .Title }}
+    <h2 style="margin: 0 0 12px; font-family: Georgia, 'Times New Roman', serif; font-size: 28px; line-height: 1.15; font-weight: bold;">
+      <a href="{{ .Permalink }}" style="color: #1E1C1A; text-decoration: none;">{{ .Title }}</a>
+    </h2>
+    {{ end }}
+
+    <div>{{ .Content }}</div>
+
+    <p style="margin: 16px 0 0; font-family: Arial, Helvetica, sans-serif; font-size: 15px;">
+      <a href="{{ .Permalink }}" style="color: #1E1C1A; font-weight: bold;">Watch or read it on the site &rarr;</a>
+    </p>
+    <p style="margin: 6px 0 0; font-family: Arial, Helvetica, sans-serif; font-size: 13px; color: #5E5952;">{{ .Date.Format "2 January 2006" }}</p>
+  </div>
+  <hr style="border: 0; border-top: 1px solid #CFC7B7; margin: 24px 0;">
+  {{ end }}
+
+  {{ with .Site.Params.newsletter_offer_url }}
+  <p style="margin: 0 0 20px; padding: 14px 16px; background: #E8E0CF; font-family: Arial, Helvetica, sans-serif; font-size: 15px;">
+    <a href="{{ . }}" style="color: #1E1C1A; font-weight: bold;">{{ with $.Site.Params.newsletter_offer_label }}{{ . }}{{ else }}Your subscriber download{{ end }} &rarr;</a>
+  </p>
+  {{ end }}
+
+  <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 13px; line-height: 1.6; color: #5E5952;">
+    You’re getting this because you signed up at <a href="{{ .Site.BaseURL }}" style="color: #5E5952;">{{ .Site.Hostname }}</a>.
+    <a href="{{ .Footer.UnsubscribeURL }}" style="color: #5E5952;">Unsubscribe</a>
+    {{ if eq (len .Pages) 1 }}{{ with index .Pages 0 }} · <a href="{{ .Permalink }}" style="color: #5E5952;">View in browser</a>{{ end }}{{ end }}
+    {{ if gt (len .Footer.MailingAddress) 0 }}<br>{{ .Footer.MailingAddress }}{{ end }}
+  </p>
+
+</div>
+</div>

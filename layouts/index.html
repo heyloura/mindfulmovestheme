@@ -1,0 +1,70 @@
+{{ define "main" }}
+{{/*
+  Home, kept lean: hero (with the next class), what's new, the courses, and
+  the signup block. The notice band comes from baseof, on every page.
+  Classes, About and the full blog live in the navigation.
+
+  The hero loop is a plain <video> with no autoplay attribute. ui.js starts it
+  only when the reader hasn't asked for less motion, so the poster still is
+  what shows with reduced motion or with scripts off, and nothing downloads
+  that won't be played.
+*/}}
+{{- $hero := partial "home-hero.html" . -}}
+{{- $posts := partial "posts.html" . -}}
+{{- $courses := partialCached "courses-list.html" "courses" -}}
+{{- $start := partial "page-by-title.html" "Start Here" -}}
+
+<section class="hero{{ if not (or $hero.poster $hero.video) }} hero--plain{{ end }}" aria-labelledby="hero-h">
+  {{- if or $hero.poster $hero.video }}
+  <div class="hero-media" aria-hidden="true">
+    {{- with $hero.poster }}
+    {{- $set := partial "photo-srcset.html" .src }}
+    <img class="hero-poster" src="{{ .src }}"{{ with $set }} srcset="{{ . }}" sizes="100vw"{{ end }} alt="">
+    {{- end }}
+    {{- with $hero.video }}
+    <video class="hero-video" muted loop playsinline preload="none" data-hero-video{{ with $hero.poster }} poster="{{ .src }}"{{ end }}>
+      <source src="{{ .src }}"{{ with .type }} type="{{ . }}"{{ end }}>
+    </video>
+    {{- end }}
+  </div>
+  {{- end }}
+  <div class="wrap hero-inner">
+    <h1 id="hero-h">{{ site.Title }}</h1>
+    {{- with $hero.welcome }}<p class="hero-welcome">{{ . }}</p>{{ end }}
+    <div class="hero-actions">
+      {{- with $start }}<a class="btn btn--action" href="{{ .RelPermalink }}" data-tinylytics-event="start.click">Start here</a>{{ end }}
+      {{ partial "next-class.html" (dict "class" "hero-next") }}
+    </div>
+  </div>
+</section>
+
+{{- with first 3 $posts }}
+<section class="section" aria-labelledby="new-h">
+  <div class="wrap h-feed">
+    <div class="section-head">
+      <div class="section-title"><h2 id="new-h" class="p-name">New</h2>{{ partial "brush-rule.html" (dict) }}</div>
+      {{- with partial "page-by-title.html" "Blog" }}<a href="{{ .RelPermalink }}">All blog posts →</a>{{ end }}
+    </div>
+    <div class="cards">
+      {{- range . }}{{ partial "card.html" . }}{{ end }}
+    </div>
+  </div>
+</section>
+{{- end }}
+
+{{- with $courses }}
+<section class="section section--courses" aria-labelledby="courses-h">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-title"><h2 id="courses-h">Courses</h2>{{ partial "brush-rule.html" (dict) }}</div>
+      {{- with partial "page-by-title.html" "Courses" }}<a href="{{ .RelPermalink }}">All courses →</a>{{ end }}
+    </div>
+    <div class="cards cards--courses">
+      {{- range . }}{{ partial "course-card.html" . }}{{ end }}
+    </div>
+  </div>
+</section>
+{{- end }}
+
+{{ partial "signup.html" . }}
+{{ end }}

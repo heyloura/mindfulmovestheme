@@ -1,0 +1,17 @@
+{{ define "main" }}
+{{/* A wrong turn: say so plainly and offer the three ways back in. */}}
+<section class="section">
+  <div class="wrap lost">
+    {{ partial "sprig.html" (dict "class" "lost-sprig") }}
+    <div class="lost-text">
+      <div class="section-title"><h1>Page not found</h1>{{ partial "brush-rule.html" (dict) }}</div>
+      <p class="prose">This page isn’t here. It may have moved, or the link may have a typo.</p>
+      <p class="lost-links">
+        {{- with partial "page-by-title.html" "Start Here" }}<a class="btn btn--action" href="{{ .RelPermalink }}">Start here</a>{{ end }}
+        {{- with partial "page-by-title.html" "Courses" }}<a class="btn" href="{{ .RelPermalink }}">Courses</a>{{ end }}
+        <a class="btn" href="{{ "/" | relURL }}">Home</a>
+      </p>
+    </div>
+  </div>
+</section>
+{{ end }}
