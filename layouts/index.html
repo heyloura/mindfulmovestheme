@@ -28,6 +28,14 @@
     {{- end }}
   </div>
   {{- end }}
+  {{- /* Anything that moves on its own for more than five seconds needs a way to
+         pause it (WCAG 2.2.2). Shown by ui.js once it knows the video's state. */}}
+  {{- with $hero.video }}
+  <button class="hero-toggle" type="button" data-hero-toggle aria-label="Play the background video" hidden>
+    <svg class="hero-toggle-pause" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 6v12M15 6v12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+    <svg class="hero-toggle-play" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8.5 5.5v13l10.5-6.5z" fill="currentColor"/></svg>
+  </button>
+  {{- end }}
   <div class="wrap hero-inner">
     <h1 id="hero-h">{{ site.Title }}</h1>
     {{- with $hero.welcome }}<p class="hero-welcome">{{ . }}</p>{{ end }}
