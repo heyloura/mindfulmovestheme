@@ -1,9 +1,15 @@
 {{/* Every post, newest first.
 
-     Posts are told from pages by their date, not by section: Micro.blog puts
-     posts in different places depending on how a blog was set up, but
-     standing pages (About, Classes, the course pages…) never carry a date.
-     Same rule as Dragon Gate.
+     A post is a page whose Type is "post", the same rule Micro.blog's own
+     blank theme uses for its feeds and archive. It leaves out standing pages
+     (About, Classes, the course pages…) and your replies to other people,
+     which Micro.blog also hands the theme but gives a different type.
+
+     (An earlier version went by "has a date", as Dragon Gate does. Replies
+     have dates too, so they turned up under New.)
+
+     Everything that needs "the posts" comes through here: home, Blog, course
+     outlines, cue card pairing, Go deeper backlinks.
 
      Usage:  {{ $posts := partial "posts.html" . }}  */}}
 {{- return (sort (where site.RegularPages "Type" "post") "Date" "desc") -}}
