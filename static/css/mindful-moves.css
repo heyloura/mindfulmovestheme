@@ -331,6 +331,18 @@ h3 { font-size: 1.9rem; line-height: 1.05; }
   content: ""; position: absolute; inset: 0;
   background: linear-gradient(to top, rgba(25, 24, 22, 0.84) 0%, rgba(25, 24, 22, 0.45) 48%, rgba(25, 24, 22, 0.08) 100%);
 }
+.hero-toggle {
+  position: absolute; top: 1rem; right: var(--gutter); z-index: 2;
+  width: var(--tap); height: var(--tap); padding: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1.5px solid rgba(236, 229, 214, 0.7); border-radius: 50%;
+  background: rgba(25, 24, 22, 0.45); color: #ECE5D6; cursor: pointer;
+}
+.hero-toggle:hover { background: rgba(25, 24, 22, 0.7); }
+.hero-toggle[hidden] { display: none; }
+.hero-toggle-play { display: none; }
+.hero-toggle.is-paused .hero-toggle-pause { display: none; }
+.hero-toggle.is-paused .hero-toggle-play { display: block; }
 .hero-inner { position: relative; width: 100%; display: grid; gap: 1.1rem; padding-top: 6rem; padding-bottom: clamp(2.5rem, 6vw, 3.5rem); }
 .hero h1 { font-size: clamp(3rem, 8vw, 5.5rem); line-height: 0.95; color: #F4EFE4; max-width: 14ch; }
 .hero-welcome { margin: 0; max-width: 36rem; font: 400 1.3rem/1.5 var(--reading); }
