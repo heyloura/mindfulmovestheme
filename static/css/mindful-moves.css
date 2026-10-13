@@ -1,0 +1,758 @@
+/* Mindful Moves — ink wash on rice paper.
+ *
+ * Two rules hold the whole look together:
+ *
+ * 1. Seal red is spent on the seal and on the ONE main action of a screen
+ *    (Start here, I practiced this, Subscribe). No red links, no red
+ *    decoration. That is what lets the seal read as a signature.
+ * 2. Calligraphy comes from real brush strokes (SVG), never from a costume
+ *    font. Type is three calm faces chosen for reading.
+ *
+ * Sections: fonts · tokens · base · type · layout · header · buttons ·
+ * footer · seal · motion · print
+ */
+
+/* ---------- fonts (self-hosted: a reader's browser never calls Google) ---------- */
+
+@font-face { font-family: "Cormorant Garamond"; font-style: normal; font-weight: 600; font-display: swap; src: url("../fonts/cormorant-garamond-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Cormorant Garamond"; font-style: italic; font-weight: 500; font-display: swap; src: url("../fonts/cormorant-garamond-latin-500-italic.woff2") format("woff2"); }
+@font-face { font-family: "Source Serif 4"; font-style: normal; font-weight: 400; font-display: swap; src: url("../fonts/source-serif-4-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Source Serif 4"; font-style: italic; font-weight: 400; font-display: swap; src: url("../fonts/source-serif-4-latin-400-italic.woff2") format("woff2"); }
+@font-face { font-family: "Source Serif 4"; font-style: normal; font-weight: 600; font-display: swap; src: url("../fonts/source-serif-4-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Atkinson Hyperlegible"; font-style: normal; font-weight: 400; font-display: swap; src: url("../fonts/atkinson-hyperlegible-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Atkinson Hyperlegible"; font-style: italic; font-weight: 400; font-display: swap; src: url("../fonts/atkinson-hyperlegible-latin-400-italic.woff2") format("woff2"); }
+@font-face { font-family: "Atkinson Hyperlegible"; font-style: normal; font-weight: 700; font-display: swap; src: url("../fonts/atkinson-hyperlegible-latin-700-normal.woff2") format("woff2"); }
+
+/* ---------- tokens ---------- */
+
+:root {
+  --ground: #F4EFE4;        /* rice paper */
+  --shade: #E8E0CF;         /* bands, cards, the current lesson */
+  --ink: #1E1C1A;           /* text and strokes */
+  --wash: #5E5952;          /* quieter text; 6:1 on ground, 5.3:1 on shade */
+  --faint: #CFC7B7;         /* rules, unfilmed segments; never text */
+  --faint-line: #B5AD9F;    /* dashed outlines */
+  --action: #A62B22;        /* the one main action */
+  --on-action: #F4EFE4;
+  --tone: grayscale(1) sepia(0.2) contrast(0.95) brightness(1.03);   /* ink-toned card pictures */
+
+  --seal: #A62B22;
+  --seal-paper: #F4EFE4;
+  --seal-vein: #4A100C;
+
+  --display: "Cormorant Garamond", "Cormorant", Garamond, "Times New Roman", serif;
+  --reading: "Source Serif 4", "Source Serif Pro", Georgia, serif;
+  --ui: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --measure: 42rem;         /* reading column */
+  --wide: 75rem;            /* page container */
+  --gutter: clamp(1rem, 4vw, 1.5rem);
+  --tap: 2.75rem;           /* 44px: every control at least this tall */
+  --taiji: cubic-bezier(.33, 0, .2, 1);
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #191816;      /* inkstone */
+    --shade: #2A2724;
+    --ink: #ECE5D6;         /* moon paper */
+    --wash: #A69F93;
+    --faint: #3A3631;
+    --faint-line: #5E5952;
+    --action: #A62B22;      /* same red: moon paper on it is 5.6:1 */
+    --on-action: #ECE5D6;
+    --tone: grayscale(1) sepia(0.25) contrast(0.95) brightness(0.8);
+    --seal: #C9503F;
+    --seal-paper: #191816;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #191816;
+  --shade: #2A2724;
+  --ink: #ECE5D6;
+  --wash: #A69F93;
+  --faint: #3A3631;
+  --faint-line: #5E5952;
+  --action: #A62B22;
+  --on-action: #ECE5D6;
+  --tone: grayscale(1) sepia(0.25) contrast(0.95) brightness(0.8);
+  --seal: #C9503F;
+  --seal-paper: #191816;
+  color-scheme: dark;
+}
+
+/* ---------- base ---------- */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font: 400 1.0625rem/1.5 var(--ui);   /* 17px interface base */
+  -webkit-font-smoothing: antialiased;
+}
+
+img, svg, video, iframe { max-width: 100%; }
+img, video { height: auto; }
+
+a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 1px; }
+a:hover { text-decoration-thickness: 2px; }
+
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; border-radius: 2px; }
+main:focus { outline: none; }
+
+::selection { background: var(--faint); color: var(--ink); }
+
+.brush-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+.skip-link {
+  position: absolute; left: var(--gutter); top: -4rem; z-index: 100;
+  padding: 0.75rem 1rem; background: var(--ink); color: var(--ground);
+  font-weight: 700; text-decoration: none;
+}
+.skip-link:focus { top: 0.75rem; }
+
+.visually-hidden {
+  position: absolute !important; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
+
+/* ---------- type ---------- */
+
+h1, h2, h3 {
+  font-family: var(--display);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.005em;
+  margin: 0;
+  text-wrap: balance;
+}
+h1 { font-size: clamp(2.6rem, 6vw, 4rem); }
+h2 { font-size: clamp(2rem, 4vw, 2.75rem); }
+h3 { font-size: 1.9rem; line-height: 1.05; }
+
+.eyebrow {
+  margin: 0;
+  font: 700 0.75rem/1.3 var(--ui);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--wash);
+}
+
+.quiet { color: var(--wash); }
+
+/* Long-form reading: posts and pages. 20px Source Serif, generous leading,
+   so a beginner reading on a phone after class never has to zoom. */
+.prose {
+  font: 400 1.25rem/1.65 var(--reading);
+  max-width: var(--measure);
+}
+.prose > * + * { margin-top: 1.1em; }
+.prose > * { margin-bottom: 0; }
+.prose h2, .prose h3 { margin-top: 1.6em; }
+.prose h2 { font-size: 2.1rem; }
+.prose h3 { font-size: 1.6rem; }
+.prose blockquote {
+  margin-left: 0; margin-right: 0; padding: 0;
+  font-style: italic; font-size: 1.35rem;
+}
+.prose ul, .prose ol { padding-left: 1.4em; }
+.prose li + li { margin-top: 0.35em; }
+.prose hr { border: 0; border-top: 1px solid var(--faint); margin: 2.5em 0; }
+.prose img, .prose video, .prose iframe { display: block; }
+.prose figure { margin-left: 0; margin-right: 0; }
+.prose figcaption { margin-top: 0.5rem; font: 400 0.9375rem/1.4 var(--ui); color: var(--wash); }
+.prose iframe { width: 100%; aspect-ratio: 16 / 9; height: auto; border: 0; }
+
+/* ---------- layout ---------- */
+
+.wrap { max-width: var(--wide); margin: 0 auto; padding: 0 var(--gutter); }
+.wrap--reading { max-width: calc(var(--measure) + 2 * var(--gutter)); }
+
+.section { padding: clamp(3rem, 8vw, 4.5rem) 0; }
+.section-head {
+  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between;
+  gap: 0.75rem 1.5rem; margin-bottom: 1.75rem;
+}
+.section-head a { font-size: 1rem; }
+.list-head { display: grid; gap: 0.75rem; margin-bottom: 2.5rem; }
+.list-head p { margin: 0; }
+
+/* ---------- header ---------- */
+
+.site-head { border-bottom: 1px solid var(--faint); }
+.head-inner {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 0.75rem 2rem; padding-top: 1rem; padding-bottom: 1rem;
+}
+
+.lockup { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; }
+.lockup-seal { flex-shrink: 0; }
+.lockup-text { display: flex; flex-direction: column; gap: 0.15rem; }
+.lockup-main { font: 600 1.75rem/1 var(--display); }
+.lockup-sub { font-size: 0.6875rem; letter-spacing: 0.32em; text-transform: uppercase; color: var(--wash); }
+
+.head-tools { display: flex; align-items: center; gap: 0.25rem; order: 3; }
+
+.theme-toggle, .menu-toggle {
+  min-width: var(--tap); min-height: var(--tap);
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+  padding: 0 0.5rem; border: 0; border-radius: 3px;
+  background: transparent; color: var(--ink); font: 700 1rem var(--ui); cursor: pointer;
+}
+.menu-toggle { display: none; }
+.menu-x { display: none; }
+
+.site-nav { order: 2; margin-left: auto; }
+.site-nav ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.25rem 1.6rem; }
+.site-nav li > a {
+  display: inline-flex; align-items: center; min-height: var(--tap);
+  font-size: 1.0625rem; text-decoration: none;
+}
+.site-nav li > a:hover { text-decoration: underline; }
+.nav-extra { display: none; }
+.site-nav a[aria-current="page"] { font-weight: 700; text-decoration: underline; text-decoration-thickness: 2px; }
+
+/* Phones: the list folds behind Menu and opens full screen. Only when JS is
+   running (html.js), so without it the list just sits under the header. */
+@media (max-width: 47.99rem) {
+  .site-nav { order: 4; flex-basis: 100%; margin-left: 0; }
+  .site-nav ul { flex-direction: column; gap: 0; }
+  .site-nav li > a { min-height: 3.5rem; font: 600 1.875rem/1 var(--display); }
+  .site-nav li + li { border-top: 1px solid var(--faint); }
+  .js .nav-open .nav-extra { display: grid; gap: 1rem; justify-items: start; margin-top: 1.75rem; }
+  .nav-next { display: inline-flex; align-items: center; min-height: var(--tap); font-size: 1rem; color: var(--wash); }
+
+  .js .menu-toggle { display: inline-flex; }
+  .js .site-nav { display: none; }
+  .js .nav-open .site-nav {
+    display: block;
+    position: fixed; inset: var(--head-h, 5rem) 0 0 0; z-index: 50;
+    overflow-y: auto; padding: 0.5rem var(--gutter) 2rem;
+    background: var(--ground);
+  }
+  .js .nav-open .menu-bars { display: none; }
+  .js .nav-open .menu-x { display: inline; }
+  .js .nav-open { overflow: hidden; }
+}
+
+/* ---------- buttons ---------- */
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+  min-height: 3rem; padding: 0 1.5rem;
+  border: 1.5px solid var(--ink); border-radius: 3px;
+  background: transparent; color: var(--ink);
+  font: 700 1.0625rem/1.2 var(--ui); text-decoration: none; cursor: pointer;
+}
+.btn:hover { background: var(--shade); text-decoration: none; }
+.btn--action { border-color: var(--action); background: var(--action); color: var(--on-action); }
+.btn--action:hover { background: var(--action); filter: brightness(1.08); }
+
+/* ---------- cards ----------
+ * Pictures on cards are ink-toned so listings stay calm and the seal stays the
+ * only red; they come to colour on hover or keyboard focus, and colour proper
+ * arrives inside the post. The whole card is one link (the title's ::after).
+ */
+
+.cards {
+  display: grid; gap: 2.75rem 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+}
+.cards--compact { grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr)); gap: 2rem; }
+.cards--courses { grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr)); gap: 2.25rem 1.75rem; }
+
+.card, .course-card { position: relative; display: flex; flex-direction: column; gap: 0.55rem; }
+.card > p, .course-card > p { margin: 0; }
+.card:focus-within, .course-card:focus-within { outline: 2px solid var(--ink); outline-offset: 6px; border-radius: 2px; }
+.card-link:focus-visible { outline: none; }
+
+.card-img { position: relative; aspect-ratio: 3 / 2; overflow: hidden; background: var(--shade); margin-bottom: 0.45rem; }
+.course-card .card-img { aspect-ratio: 4 / 3; }
+.card-img img {
+  display: block; width: 100%; height: 100%; object-fit: cover;
+  filter: var(--tone);
+  transition: filter 1.4s var(--taiji);
+}
+.card:focus-within .card-img img, .course-card:focus-within .card-img img { filter: none; }
+@media (hover: hover) {
+  .card:hover .card-img img, .course-card:hover .card-img img { filter: none; }
+}
+
+/* an episode's picture carries a play mark */
+.card-img--play::before {
+  content: ""; position: absolute; left: 50%; top: 50%; width: 3.25rem; height: 3.25rem;
+  transform: translate(-50%, -50%); border-radius: 50%;
+  border: 1.5px solid rgba(236, 229, 214, 0.95); background: rgba(25, 24, 22, 0.4);
+}
+.card-img--play::after {
+  content: ""; position: absolute; left: 50%; top: 50%; transform: translate(-30%, -50%);
+  border-style: solid; border-width: 0.55rem 0 0.55rem 0.9rem;
+  border-color: transparent transparent transparent rgba(236, 229, 214, 0.95);
+}
+
+.card-title { font-size: 1.75rem; line-height: 1.08; }
+.card-title a { text-decoration: none; }
+.card-link::after { content: ""; position: absolute; inset: 0; }
+.card:hover .card-title a, .course-card:hover .card-title a { text-decoration: underline; text-decoration-thickness: 1px; }
+.card-excerpt { font: 400 1.125rem/1.6 var(--reading); }
+.card-excerpt a { text-decoration: none; }
+.card-meta { font-size: 0.9375rem; color: var(--wash); }
+.card--text { padding-top: 1.1rem; border-top: 1px solid var(--faint); }
+
+.members-badge {
+  position: absolute; top: 0.6rem; right: 0.6rem;
+  display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.25rem 0.6rem;
+  background: var(--ink); color: var(--ground); font-size: 0.8125rem; font-weight: 700;
+}
+
+/* ---------- home hero ----------
+ * Always ink-dark behind the words, whatever the day/night setting, because a
+ * photograph or video sits under them. The scrim is there for legibility.
+ */
+
+.hero {
+  position: relative; overflow: hidden;
+  min-height: min(36rem, 82vh); display: flex; align-items: flex-end;
+  background: #2A2724; color: #ECE5D6;
+  --ink: #ECE5D6;                       /* focus rings stay visible on the dark */
+}
+.hero-media, .hero-poster, .hero-video { position: absolute; inset: 0; width: 100%; height: 100%; }
+.hero-poster, .hero-video { object-fit: cover; }
+.hero-video { opacity: 0; transition: opacity 1.6s var(--taiji); }
+.hero-video.is-playing { opacity: 1; }
+.hero-media::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(25, 24, 22, 0.84) 0%, rgba(25, 24, 22, 0.45) 48%, rgba(25, 24, 22, 0.08) 100%);
+}
+.hero-inner { position: relative; width: 100%; display: grid; gap: 1.1rem; padding-top: 6rem; padding-bottom: clamp(2.5rem, 6vw, 3.5rem); }
+.hero h1 { font-size: clamp(3rem, 8vw, 5.5rem); line-height: 0.95; color: #F4EFE4; max-width: 14ch; }
+.hero-welcome { margin: 0; max-width: 36rem; font: 400 1.3rem/1.5 var(--reading); }
+.hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.9rem 1.5rem; margin-top: 0.4rem; }
+.hero-next { display: inline-flex; align-items: center; min-height: var(--tap); font-size: 1rem; }
+
+.hero--plain { min-height: 0; background: var(--ground); color: var(--ink); --ink: inherit; }
+.hero--plain .hero-inner { padding-top: clamp(3rem, 8vw, 4.5rem); }
+.hero--plain h1 { color: var(--ink); }
+
+/* ---------- single (reading layout) ---------- */
+
+.entry-head { padding: clamp(2.5rem, 7vw, 4rem) 0 2rem; display: grid; gap: 0.9rem; }
+.entry-meta { margin: 0; font-size: 0.9375rem; color: var(--wash); }
+.entry-meta a { text-decoration: none; }
+.entry-body { padding-bottom: 3rem; }
+.entry-course { margin: 0 0 4rem; font-size: 1rem; }
+
+/* ---------- episode ----------
+ * Course sidebar beside the lesson on wide screens; a drawer above it on
+ * narrow ones (a <details>: ui.js closes it on phones, holds it open here).
+ */
+
+.episode { display: grid; gap: 1.5rem 3.5rem; padding-top: 1.5rem; padding-bottom: 4rem; }
+.episode-main { min-width: 0; max-width: 52rem; }
+.episode-head { display: grid; gap: 0.8rem; padding: 1rem 0 1.75rem; }
+.episode-head h1 { font-size: clamp(2.6rem, 6vw, 3.75rem); }
+.episode-body { max-width: none; }
+.episode-body > :not(iframe):not(video):not(figure) { max-width: var(--measure); }
+.episode-cue { margin: 2.5rem 0 0; }
+
+/* "I practiced this": scripts only, since it does nothing without them */
+.practice { display: none; margin-top: 2.5rem; }
+.js .practice { display: grid; gap: 0.75rem; justify-items: start; }
+.practice p { margin: 0; }
+.practice-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1.25rem; }
+.practice-btn[aria-pressed="true"] { background: transparent; color: var(--ink); border-color: var(--ink); }
+.practice-btn[aria-pressed="true"]::before {
+  content: ""; width: 0.95rem; height: 0.45rem; border-radius: 0 100% 0 100%;
+  background: currentColor; transform: rotate(-24deg);       /* a small leaf */
+}
+.practice-count { font-size: 0.9375rem; color: var(--wash); }
+.practice-status { font-style: italic; min-height: 1.5em; }
+.practice-status:empty { min-height: 0; }
+.practice-ask { max-width: 34rem; padding: 1rem 1.15rem; background: var(--shade); display: grid; gap: 0.85rem; }
+.practice-ask-buttons { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem; }
+.practice-kudos {
+  position: absolute !important; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; padding: 0;
+}
+.practice-forget { font-size: 0.875rem; }
+.course-outline .practice-forget { margin-top: 1rem; }
+
+.btn-link {
+  display: inline-flex; align-items: center; min-height: var(--tap); padding: 0;
+  border: 0; background: transparent; color: var(--ink);
+  font: 400 1rem var(--ui); text-decoration: underline; text-underline-offset: 0.2em; cursor: pointer;
+}
+.practice-forget .btn-link { font-size: 0.875rem; color: var(--wash); }
+
+/* course complete: the seal set down at an angle, like a chop on a finished painting */
+.course-complete { display: flex; align-items: center; gap: 0.75rem; margin: 0.75rem 0 1rem; font: 600 1.35rem/1.1 var(--display); }
+.course-complete[hidden] { display: none; }
+.course-complete-seal { transform: rotate(-8deg); }
+
+.go-deeper { margin-top: 3.5rem; display: grid; gap: 1.25rem; }
+
+.lesson-nav {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+  margin-top: 3.5rem; padding-top: 1.75rem; border-top: 1px solid var(--faint);
+}
+.lesson-nav a { display: grid; gap: 0.3rem; align-content: start; min-height: var(--tap); text-decoration: none; }
+.lesson-nav-next { grid-column: 2; text-align: right; }
+.lesson-nav-title { font: 600 1.6rem/1.1 var(--display); }
+.lesson-nav a:hover .lesson-nav-title { text-decoration: underline; text-decoration-thickness: 1px; }
+
+.course-drawer > summary { list-style: none; }
+.course-drawer > summary::-webkit-details-marker { display: none; }
+.drawer-summary {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "where chev" "stalk stalk";
+  gap: 0.5rem 1rem; padding: 0.9rem 1rem 1.1rem; background: var(--shade); cursor: pointer;
+}
+.drawer-where { grid-area: where; display: grid; gap: 0.15rem; }
+.drawer-title { font-weight: 700; font-size: 1.0625rem; }
+.drawer-chevron { grid-area: chev; align-self: center; transition: transform 0.4s var(--taiji); }
+.course-drawer[open] .drawer-chevron { transform: rotate(180deg); }
+.drawer-body { padding-top: 1.25rem; }
+
+.mini-stalk { grid-area: stalk; display: flex; gap: 3px; padding-top: 0.6rem; }
+.mini-seg { position: relative; flex: 1; height: 9px; border-radius: 3px; background: var(--ink); }
+.mini-seg.is-unfilmed { background: transparent; border: 1.5px dashed var(--faint-line); }
+.mini-seg.is-current { height: 13px; margin-top: -2px; }
+.mini-leaf {
+  position: absolute; top: -8px; left: 4px; width: 13px; height: 6px;
+  border-radius: 0 100% 0 100%; background: var(--ink); transform: rotate(-24deg);
+  opacity: 0; transition: opacity 1.2s var(--taiji);
+}
+.is-practiced > .mini-leaf { opacity: 1; }
+
+.side-head { display: grid; gap: 0.2rem; margin-bottom: 1.25rem; }
+.side-head p { margin: 0; }
+.side-course { font: 600 2.1rem/1 var(--display); }
+.side-course a { text-decoration: none; }
+.side-count { color: var(--wash); font-size: 0.9375rem; }
+
+@media (min-width: 64rem) {
+  .episode { grid-template-columns: 19rem minmax(0, 1fr); align-items: start; padding-top: 2.5rem; }
+  .drawer-summary { display: none; }
+  .drawer-body { padding-top: 1rem; }
+}
+
+/* ---------- bamboo ----------
+ * One segment per outline line, read top-down. Inked = filmed, faint dashed =
+ * not filmed yet, a leaf = practiced (opt-in, on this device).
+ */
+
+.bamboo { list-style: none; margin: 0; padding: 0; }
+.bamboo-line {
+  position: relative; display: grid; grid-template-columns: 48px minmax(0, 1fr);
+  align-items: center; column-gap: 0.6rem; min-height: 52px; padding-right: 0.5rem; border-radius: 2px;
+}
+.bamboo-seg { display: block; width: 48px; height: 52px; overflow: visible; align-self: start; }
+.bamboo-node { fill: none; stroke: var(--ink); stroke-width: 2.4; stroke-linecap: round; }
+.is-unfilmed .bamboo-node { stroke: var(--faint-line); }
+.bamboo-fill { fill: var(--ink); fill-opacity: 0.84; }
+.bamboo-outline { fill: none; stroke: var(--faint-line); stroke-width: 1.5; stroke-dasharray: 3 3; }
+.bamboo-leaf { opacity: 0; transition: opacity 1.2s var(--taiji); }
+.bamboo-leaf path { fill: var(--ink); fill-opacity: 0.86; }
+.is-practiced .bamboo-leaf { opacity: 1; }
+
+.bamboo-label { padding: 0.35rem 0; font-size: 1rem; line-height: 1.25; }
+.bamboo-n { margin-right: 0.15rem; font-size: 0.875rem; color: var(--wash); }
+.bamboo-label a { text-decoration: none; }
+.bamboo-label a::after { content: ""; position: absolute; inset: 0; }
+.bamboo-line:hover a { text-decoration: underline; text-decoration-thickness: 1px; }
+.bamboo-line[aria-current="step"] { background: var(--shade); }
+.bamboo-line[aria-current="step"] a { font-weight: 700; }
+.is-unfilmed .bamboo-label { color: var(--wash); }
+.bamboo-status { display: block; font-size: 0.8125rem; }
+
+.bamboo--large .bamboo-label { font: 600 1.6rem/1.15 var(--display); }
+.bamboo--large .bamboo-n { font-family: var(--ui); font-weight: 400; }
+.bamboo--large .bamboo-status { font: 400 0.8125rem/1.3 var(--ui); }
+
+/* ---------- course page ---------- */
+
+.course-hero {
+  position: relative; overflow: hidden; min-height: 22rem;
+  display: flex; align-items: flex-end; background: #2A2724; color: #ECE5D6;
+}
+.course-hero-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.course-hero::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(25, 24, 22, 0.82) 0%, rgba(25, 24, 22, 0.15) 75%);
+}
+.course-hero-inner { position: relative; z-index: 1; width: 100%; display: grid; gap: 0.6rem; padding-top: 5rem; padding-bottom: 2.25rem; }
+.course-hero .eyebrow { color: #D9D2C4; }
+.course-hero h1 { font-size: clamp(3rem, 8vw, 5rem); color: #F4EFE4; }
+.course-hero--plain { min-height: 0; background: var(--ground); color: var(--ink); }
+.course-hero--plain::after { content: none; }
+.course-hero--plain .eyebrow { color: var(--wash); }
+.course-hero--plain h1 { color: var(--ink); }
+.course-hero--plain .course-hero-inner { padding-top: clamp(2.5rem, 7vw, 4rem); padding-bottom: 0; }
+
+.course-body { display: grid; gap: 3rem; padding-top: 3rem; padding-bottom: 4rem; }
+.course-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin: 2rem 0 0; }
+.course-outline > h2 { margin-bottom: 1rem; }
+@media (min-width: 56rem) {
+  .course-body { grid-template-columns: minmax(0, 1fr) minmax(0, 28rem); gap: 4rem; align-items: start; }
+}
+
+/* ---------- courses page ---------- */
+
+.course-family + .course-family { margin-top: 3.5rem; }
+.family-head { font-size: 2rem; margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--faint); }
+
+/* ---------- notice band ----------
+ * Inverted from the page (ink on paper by day, moon paper on inkstone by
+ * night) so it reads as a notice without spending the seal's red.
+ */
+
+.notice { background: var(--ink); color: var(--ground); }
+.notice :focus-visible { outline-color: var(--ground); }
+.notice-inner { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.3rem 1rem; padding-top: 0.75rem; padding-bottom: 0.75rem; }
+.notice-label { font: 700 0.75rem/1.3 var(--ui); letter-spacing: 0.2em; text-transform: uppercase; opacity: 0.8; }
+.notice-text { font-size: 1rem; }
+.notice-text p { margin: 0; }
+
+/* ---------- classes page ---------- */
+
+.entry-body li.is-next { font-weight: 600; }
+.next-tag {
+  display: inline-block; margin-right: 0.6rem; padding: 0.1rem 0.5rem; vertical-align: 0.15em;
+  background: var(--ink); color: var(--ground);
+  font: 700 0.75rem/1.4 var(--ui); letter-spacing: 0.12em; text-transform: uppercase;
+}
+
+/* ---------- signup block ----------
+ * Its words, picture and form all come from the Subscribe page; the form is
+ * Micro.blog's own markup, so it's styled by element, not by class.
+ */
+
+.signup { background: var(--shade); margin-top: 2rem; }
+.signup-inner {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 2.5rem 3.5rem;
+  padding-top: clamp(3rem, 8vw, 4.5rem); padding-bottom: clamp(3rem, 8vw, 4.5rem);
+}
+.signup-pic { flex: 1 1 16rem; max-width: 24rem; }
+.signup-pic img { display: block; width: 100%; }
+.signup-text { flex: 999 1 24rem; min-width: 0; display: grid; gap: 1rem; }
+.signup-pitch { margin: 0; max-width: 34rem; font: 400 1.1875rem/1.6 var(--reading); }
+.signup-note { margin: 0; font-size: 0.875rem; color: var(--wash); }
+.signup-form form { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0.6rem 0.75rem; }
+.signup-form p { margin: 0; }
+.signup-form label { flex-basis: 100%; font-weight: 700; font-size: 0.9375rem; }
+.signup-form input[type="email"], .signup-form input[type="text"] {
+  flex: 1 1 16rem; min-height: 3.125rem; padding: 0 0.9rem;
+  border: 1.5px solid var(--ink); border-radius: 3px; background: var(--ground); color: var(--ink);
+  font: 400 1.0625rem var(--ui);
+}
+.signup-form input[type="submit"], .signup-form button {
+  min-height: 3.125rem; padding: 0 1.5rem; border: 0; border-radius: 3px;
+  background: var(--action); color: var(--on-action); font: 700 1.0625rem var(--ui); cursor: pointer;
+}
+
+/* ---------- video tabs (episodes with several videos) ---------- */
+
+.video-tabs { margin: 0 0 2.25rem; }
+.video-tablist {
+  display: flex; gap: 0.25rem 1.4rem; overflow-x: auto; scrollbar-width: thin;
+  margin-bottom: 1rem; border-bottom: 1px solid var(--faint);
+}
+.video-tab {
+  position: relative; flex-shrink: 0; min-height: var(--tap); padding: 0 0.1rem;
+  border: 0; background: transparent; color: var(--wash); font: 400 1rem var(--ui); cursor: pointer;
+}
+.video-tab:hover { color: var(--ink); }
+.video-tab[aria-selected="true"] { color: var(--ink); font-weight: 700; }
+.video-tab[aria-selected="true"]::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 3px;
+  border-radius: 2px; background: var(--ink);
+}
+.video-panel > * + * { margin-top: 1rem; }
+
+/* ---------- cue card ----------
+ * On screen, a card on the page. In print, exactly one 6×4 inch card: the
+ * named page sets the paper, everything around the card is hidden, and the
+ * seal goes flat like every printed seal.
+ */
+
+.cuecard-page { padding: 2rem 0 4rem; }
+.cuecard-head { margin-bottom: 1.25rem; }
+.cuecard-head p { margin: 0; }
+.cuecard {
+  display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 2rem;
+  max-width: 54rem; aspect-ratio: 3 / 2; padding: 2rem;
+  background: var(--ground); border: 1px solid var(--faint-line);
+}
+.cuecard-pic { display: flex; flex-direction: column; gap: 0.5rem; min-height: 0; }
+.cuecard-pic img { flex: 1; width: 100%; min-height: 0; object-fit: contain; border: 1px solid var(--faint); }
+.cuecard-credit { margin: 0; font-size: 0.6875rem; line-height: 1.35; color: var(--wash); }
+.cuecard-credit a { color: inherit; }
+.cuecard-text { display: flex; flex-direction: column; gap: 0.75rem; min-width: 0; }
+.cuecard-text > p { margin: 0; }
+.cuecard-title { font-size: clamp(2.4rem, 5vw, 3.75rem); line-height: 0.95; }
+.cuecard-quote { font: italic 400 1.25rem/1.45 var(--reading); }
+.cuecard-rule { display: block; width: 100%; max-width: 22rem; height: 12px; }
+.cuecard-rule path { fill: var(--ink); fill-opacity: 0.85; }
+.cuecard-label { font: 700 0.8125rem/1.3 var(--ui); letter-spacing: 0.2em; text-transform: uppercase; }
+.cuecard-drill { font-size: 1.1rem; line-height: 1.5; }
+.cuecard-drill > * { margin: 0; }
+.cuecard-drill > * + * { margin-top: 0.5rem; }
+.cuecard-foot {
+  margin-top: auto; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 0.5rem 1rem; font-size: 0.875rem; color: var(--wash);
+}
+.cuecard-mark { display: inline-flex; align-items: center; gap: 0.5rem; font: 600 1.15rem/1 var(--display); color: var(--ink); }
+.cuecard-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.5rem; margin: 1.75rem 0 0; }
+
+@media (max-width: 40rem) {
+  .cuecard { grid-template-columns: 1fr; aspect-ratio: auto; padding: 1.25rem; gap: 1.25rem; }
+  .cuecard-pic img { max-height: 18rem; }
+}
+
+@page cuecard { size: 6in 4in; margin: 0; }
+
+/* ---------- blog page ---------- */
+
+.filters { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
+.filters a {
+  display: inline-flex; align-items: center; min-height: var(--tap); padding: 0 0.95rem;
+  border: 1px solid var(--faint-line); border-radius: 999px; font-size: 0.9375rem; text-decoration: none;
+}
+.filters a:hover { background: var(--shade); }
+.older { margin-top: 4rem; }
+.older-list { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; gap: 0.6rem; font-size: 1.0625rem; }
+
+/* ---------- footer ---------- */
+
+.site-foot { border-top: 1px solid var(--faint); margin-top: 2rem; }
+.foot-inner {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 1.5rem 2rem; padding-top: 2.5rem; padding-bottom: 3rem;
+}
+.foot-card { display: flex; align-items: center; gap: 0.75rem; }
+.foot-name { font: 600 1.4rem/1.1 var(--display); text-decoration: none; }
+.foot-profiles { margin: 0.25rem 0 0; display: flex; gap: 1rem; font-size: 0.875rem; color: var(--wash); }
+.foot-profiles:empty { display: none; }
+.foot-nav { display: flex; flex-wrap: wrap; gap: 0.25rem 1.5rem; font-size: 0.9375rem; color: var(--wash); }
+.foot-nav a { display: inline-flex; align-items: center; min-height: var(--tap); text-decoration: none; }
+.foot-nav a:hover { text-decoration: underline; }
+
+/* ---------- seal ---------- */
+
+.seal { display: block; }
+.seal-red { fill: var(--seal); }
+.seal-paper { fill: var(--seal-paper); }
+.seal-vein { fill: var(--seal-vein); }
+.seal-vein-light { fill: var(--seal-paper); }
+.seal-paper-stroke { fill: none; stroke: var(--seal-paper); stroke-linecap: round; }
+
+/* ---------- brush strokes: rule, sprig, 404 ---------- */
+
+.section-title { display: grid; gap: 0.55rem; justify-items: start; }
+.brush-rule { display: block; width: 8.5rem; height: 10px; overflow: visible; }
+.brush-rule path { fill: var(--ink); fill-opacity: 0.85; }
+.hero .brush-rule path { fill: #ECE5D6; }
+
+.sprig { display: block; width: 7.5rem; height: auto; overflow: visible; }
+.sprig-stalk rect { fill: var(--ink); fill-opacity: 0.82; }
+.sprig-nodes path { fill: none; stroke: var(--ink); stroke-width: 2.6; stroke-linecap: round; }
+.sprig-leaves path { fill: var(--ink); fill-opacity: 0.84; }
+
+.list-head--sprig { position: relative; padding-right: 8rem; }
+.list-sprig { position: absolute; right: 0; top: -0.5rem; }
+@media (max-width: 40rem) {
+  .list-head--sprig { padding-right: 0; }
+  .list-sprig { display: none; }
+}
+
+.lost { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 2rem 3rem; }
+.lost-sprig { width: 9rem; }
+.lost-text { flex: 1 1 22rem; display: grid; gap: 1.25rem; }
+.lost-text .prose { margin: 0; }
+.lost-links { display: flex; flex-wrap: wrap; gap: 0.75rem; margin: 0.5rem 0 0; }
+
+/* ---------- paint-in ----------
+ * Brush strokes paint themselves in once, the first time they scroll into
+ * view, at taiji pace. html.paint-ready is set in <head> only when motion is
+ * welcome; ui.js adds .is-painted to each [data-paint] as it arrives. With
+ * reduced motion, no scripts, or in print, every stroke is simply there.
+ *
+ *   .paint-sweep    a horizontal stroke, laid down left to right
+ *   .paint-grow-up  a sprig segment, growing from its base
+ *   .paint-fade     a joint, inked in
+ *   .paint-leaf     a leaf, opening from its stem
+ *   --d             a stroke's place in the sequence (sprig); ui.js sets --i
+ *                   on each line of a bamboo stalk the same way
+ */
+
+.paint-sweep { transform-box: fill-box; transform-origin: 0 50%; transition: transform 2s var(--taiji); }
+.paint-grow-up { transform-box: fill-box; transform-origin: 50% 100%; transition: transform 1.4s var(--taiji) calc(var(--d, 0) * 0.45s); }
+.paint-fade { transition: opacity 1.2s var(--taiji) calc(var(--d, 0) * 0.45s + 0.3s); }
+.paint-leaf { transform-box: fill-box; transform-origin: 0 50%; transition: transform 1.5s var(--taiji) calc(var(--d, 0) * 0.3s + 0.4s), opacity 1.5s var(--taiji) calc(var(--d, 0) * 0.3s + 0.4s); }
+
+.paint-ready [data-paint]:not(.is-painted) .paint-sweep { transform: scaleX(0); }
+.paint-ready [data-paint]:not(.is-painted) .paint-grow-up { transform: scaleY(0); }
+.paint-ready [data-paint]:not(.is-painted) .paint-fade { opacity: 0; }
+.paint-ready [data-paint]:not(.is-painted) .paint-leaf { transform: scale(0.15) rotate(-14deg); opacity: 0; }
+
+/* the bamboo stalk: each line's segment is laid down top to bottom in turn */
+.bamboo .bamboo-fill { transform-box: fill-box; transform-origin: 50% 0; transition: transform 1.3s var(--taiji) calc(var(--i, 0) * 0.16s); }
+.bamboo .bamboo-node, .bamboo .bamboo-outline { transition: opacity 1.2s var(--taiji) calc(var(--i, 0) * 0.16s + 0.35s); }
+.paint-ready [data-paint]:not(.is-painted) .bamboo-fill { transform: scaleY(0); }
+.paint-ready [data-paint]:not(.is-painted) .bamboo-node,
+.paint-ready [data-paint]:not(.is-painted) .bamboo-outline { opacity: 0; }
+
+/* ---------- motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- print ---------- */
+
+@media print {
+  :root {
+    --ground: #fff; --shade: #fff; --ink: #000; --wash: #333;
+    --seal: #A62B22; --seal-paper: #fff;
+  }
+  /* every seal prints flat: no swirl, no rough edge */
+  .seal-vein, .seal-vein-light { display: none; }
+  .seal * { filter: none; }
+  /* and every brush stroke prints whole, painted or not (only the painted
+     pieces: leaves keep their own placement, and unpractised leaves stay hidden) */
+  .paint-ready [data-paint] .paint-sweep, .paint-ready [data-paint] .paint-grow-up,
+  .paint-ready [data-paint] .paint-leaf, .paint-ready [data-paint] .bamboo-fill { transform: none !important; }
+  .paint-ready [data-paint] .paint-fade, .paint-ready [data-paint] .paint-leaf,
+  .paint-ready [data-paint] .bamboo-node, .paint-ready [data-paint] .bamboo-outline { opacity: 1 !important; }
+  .head-tools, .site-nav, .skip-link, .foot-nav, .notice { display: none !important; }
+  .site-head, .site-foot { border: 0; }
+
+  /* a cue card prints alone, as one 6×4 inch card */
+  .cuecard-page .cuecard-head, .cuecard-page .cuecard-actions { display: none !important; }
+  body:has(.cuecard-page) .site-head, body:has(.cuecard-page) .site-foot { display: none !important; }
+  .cuecard-page { padding: 0; }
+  .cuecard-page .wrap { max-width: none; padding: 0; }
+  .cuecard {
+    page: cuecard; break-inside: avoid;
+    width: 6in; height: 4in; max-width: none; aspect-ratio: auto;
+    grid-template-columns: 2.1in minmax(0, 1fr); gap: 0.25in; padding: 0.3in; border: 0;
+  }
+  .cuecard-title { font-size: 30pt; }
+  .cuecard-quote { font-size: 11pt; }
+  .cuecard-label { font-size: 7pt; }
+  .cuecard-drill { font-size: 10.5pt; }
+  .cuecard-credit { font-size: 6pt; }
+  .cuecard-foot { font-size: 7.5pt; }
+  .cuecard-mark { font-size: 11pt; }
+}
