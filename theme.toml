@@ -1,0 +1,10 @@
+name = "mindful-moves"
+license = "MIT"
+description = "Ink wash on rice paper: a blog and a course at once. Ordered video lessons with a bamboo progress stalk, cue cards that print, and everything driven by your own pages and categories."
+homepage = "https://mindfulmovestaichi.com/"
+tags = ["microblog", "ink", "course", "video", "responsive", "dark-mode"]
+features = ["dark-mode", "responsive", "course-outline", "print-cue-cards"]
+min_version = "0.158.0"
+
+[author]
+  name = "Loura"

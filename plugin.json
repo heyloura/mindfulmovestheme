@@ -1,0 +1,35 @@
+{
+  "name": "mindful-moves",
+  "version": "0.1.0",
+  "description": "Ink wash on rice paper: a blog and a course at once. Ordered video lessons with a bamboo progress stalk, cue cards that print, and everything driven by your own pages and categories.",
+  "author": {
+    "name": "Loura"
+  },
+  "fields": [
+    {
+      "field": "params.wordmark",
+      "label": "Wordmark, first line",
+      "placeholder": "Mindful Moves"
+    },
+    {
+      "field": "params.wordmark_sub",
+      "label": "Wordmark, small second line",
+      "placeholder": "Tai Chi Chuan"
+    },
+    {
+      "field": "params.tinylytics",
+      "label": "Tinylytics site code",
+      "placeholder": "the code from your Tinylytics embed URL"
+    },
+    {
+      "field": "params.newsletter_offer_label",
+      "label": "Newsletter freebie, link text (shown at the end of every email)",
+      "placeholder": "Your cue card deck (PDF)"
+    },
+    {
+      "field": "params.newsletter_offer_url",
+      "label": "Newsletter freebie, link address",
+      "placeholder": "https://…/cue-cards.pdf"
+    }
+  ]
+}
