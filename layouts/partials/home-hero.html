@@ -4,9 +4,11 @@
   Returns a dict:
     welcome  the first paragraph that is just words (not the video link,
              not a picture), as plain text, or ""
-    video    dict (src, type) for the first link or path to a video FILE
-             (.mp4 .webm .m4v .mov), or false. It must be the file itself,
-             not a player embed: a background loop can't be an iframe.
+    video    dict (src, type) for the first link or path to a video file
+             (.mp4 .webm .m4v .mov) or a streaming playlist (.m3u8, which is
+             what Micro.blog turns an uploaded video into), or false. It must
+             be the video itself, not a player embed: a background loop can't
+             be an iframe. ui.js checks the browser can play it before trying.
     poster   card-image.html for the page: the still shown while the video
              loads, and instead of it for anyone who prefers less motion
 
@@ -15,13 +17,13 @@
 {{- $out := dict "welcome" "" "video" false "poster" false -}}
 {{- with partial "page-by-title.html" "Home" -}}
   {{- $html := string .Content -}}
-  {{- $vidRe := `[^\s"'<>]+\.(?:mp4|webm|m4v|mov)(?:\?[^\s"'<>]*)?` -}}
+  {{- $vidRe := `[^\s"'<>]+\.(?:mp4|webm|m4v|mov|m3u8)(?:\?[^\s"'<>]*)?` -}}
 
   {{- $video := false -}}
   {{- with findRE $vidRe $html 1 -}}
     {{- $src := htmlUnescape (index . 0) -}}
     {{- $ext := lower (replaceRE `^.*\.([A-Za-z0-9]+)(?:\?.*)?$` "$1" $src) -}}
-    {{- $type := index (dict "mp4" "video/mp4" "m4v" "video/mp4" "webm" "video/webm" "mov" "video/quicktime") $ext -}}
+    {{- $type := index (dict "mp4" "video/mp4" "m4v" "video/mp4" "webm" "video/webm" "mov" "video/quicktime" "m3u8" "application/vnd.apple.mpegurl") $ext -}}
     {{- $video = dict "src" $src "type" $type -}}
   {{- end -}}
 
