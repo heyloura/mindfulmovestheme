@@ -101,30 +101,73 @@
 
   /* ---- home hero loop ----
    *
-   * The <video> has no autoplay attribute: it starts here, and only for
-   * readers who haven't asked for less motion. Everyone else, and anyone
-   * without scripts, sees the poster still, and the video never downloads.
+   * The <video> has no autoplay attribute. It starts here, and only when
+   *   - the reader hasn't asked their device for less motion,
+   *   - their phone isn't saving data (Data Saver, or a 2G connection), and
+   *   - they didn't pause it on an earlier visit.
+   * Otherwise the poster still shows and the video never downloads.
+   *
+   * The pause/play button (WCAG 2.2.2) appears whenever there's a video, so
+   * a reader who got the still can choose to play it. A pause is remembered
+   * on this device ("mm-hero"); pressing play again forgets it.
    */
   var hero = document.querySelector('[data-hero-video]');
+  // A streaming playlist (.m3u8, what Micro.blog makes of an uploaded video)
+  // plays natively in Safari and in Chrome/Edge 142+, not in desktop Firefox.
+  // If this browser says it can't play the source, the still is all there is:
+  // no download, and no play button that would do nothing.
+  var heroSource = hero && hero.querySelector('source');
+  var heroType = heroSource && heroSource.getAttribute('type');
+  if (hero && heroType && !hero.canPlayType(heroType)) hero = null;
   if (hero) {
+    var HKEY = 'mm-hero';
+    var heroBtn = document.querySelector('[data-hero-toggle]');
     var calm = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
-    var start = function () {
-      if (calm && calm.matches) return;
+    var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    var thrifty = !!(conn && (conn.saveData || /(^|-)2g$/.test(conn.effectiveType || '')));
+    var heroPlaying = false;
+
+    var pausedBefore = function () {
+      try { return localStorage.getItem(HKEY) === 'paused'; } catch (e) { return false; }
+    };
+    var remember = function (paused) {
+      try {
+        if (paused) localStorage.setItem(HKEY, 'paused');
+        else localStorage.removeItem(HKEY);
+      } catch (e) {}
+    };
+    var syncHero = function () {
+      hero.classList.toggle('is-playing', heroPlaying);
+      if (!heroBtn) return;
+      heroBtn.setAttribute('aria-label', heroPlaying ? 'Pause the background video' : 'Play the background video');
+      heroBtn.classList.toggle('is-paused', !heroPlaying);
+    };
+    var playHero = function () {
       hero.preload = 'auto';
       var p = hero.play();
-      if (p && p.then) {
-        p.then(function () { hero.classList.add('is-playing'); }, function () {});
-      } else {
-        hero.classList.add('is-playing');
-      }
+      var started = function () { heroPlaying = true; syncHero(); };
+      if (p && p.then) p.then(started, function () { heroPlaying = false; syncHero(); });
+      else started();
     };
-    var stop = function () {
+    var pauseHero = function () {
       hero.pause();
-      hero.classList.remove('is-playing');
+      heroPlaying = false;
+      syncHero();
     };
-    start();
+
+    if (heroBtn) {
+      heroBtn.hidden = false;
+      heroBtn.addEventListener('click', function () {
+        if (heroPlaying) { pauseHero(); remember(true); }
+        else { remember(false); playHero(); }
+      });
+    }
+
+    if (!(calm && calm.matches) && !thrifty && !pausedBefore()) playHero();
+    else syncHero();
+
     if (calm && calm.addEventListener) {
-      calm.addEventListener('change', function (e) { if (e.matches) stop(); else start(); });
+      calm.addEventListener('change', function (e) { if (e.matches) pauseHero(); });
     }
   }
 
