@@ -7,7 +7,9 @@
 */}}
 {{- $a := partial "author.html" . -}}
 {{- $k := partialCached "post-kind.html" . .RelPermalink -}}
-{{- $dated := not .Date.IsZero -}}
+{{- /* posts and replies show their date; standing pages don't, though
+       Micro.blog gives them one */ -}}
+{{- $dated := not (partial "is-standing-page.html" .) -}}
 {{- $terms := .GetTerms "categories" -}}
 {{- $body := partial "strip-card-image.html" .Content -}}
 {{- $body = partial "responsive-img.html" (dict "html" $body "sizes" "(max-width: 44rem) calc(100vw - 2rem), 42rem") -}}
