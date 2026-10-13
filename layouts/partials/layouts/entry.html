@@ -1,0 +1,52 @@
+{{/*
+  The reading layout: blog posts, deep dives, notes, cue cards (until their
+  own layout in phase 4) and plain standing pages (About, Start Here…).
+
+  A deep dive links back to its course; untitled posts are notes, with no
+  p-name, or parsers invent one and treat the note as an article.
+*/}}
+{{- $a := partial "author.html" . -}}
+{{- $k := partialCached "post-kind.html" . .RelPermalink -}}
+{{- $dated := not .Date.IsZero -}}
+{{- $terms := .GetTerms "categories" -}}
+{{- $body := partial "strip-card-image.html" .Content -}}
+{{- $body = partial "responsive-img.html" (dict "html" $body "sizes" "(max-width: 44rem) calc(100vw - 2rem), 42rem") -}}
+{{- $title := partial "norm-title.html" .Title -}}
+{{- $isClasses := and (not $dated) (eq $title "classes") -}}
+<article class="entry{{ if $dated }} h-entry{{ end }}{{ if not .Title }} entry--note{{ end }}"
+  {{- if $isClasses }}{{ with partialCached "classes-data.html" "classes" }} data-classes="{{ . | jsonify }}"{{ end }}{{ end }}>
+  <div class="wrap wrap--reading">
+    <header class="entry-head">
+      {{- if eq $k.kind "deep-dive" }}
+      <p class="eyebrow">Deep dive · <a class="p-category" href="{{ $k.course.RelPermalink }}">{{ $k.course.Title }}</a></p>
+      {{- else if eq $k.kind "cue-card" }}
+      <p class="eyebrow">Cue card</p>
+      {{- else if and $dated $terms }}
+      <p class="eyebrow">
+        {{- range $i, $t := $terms }}{{ if $i }} · {{ end }}<a class="p-category" href="{{ $t.RelPermalink }}">{{ $t.Title }}</a>{{ end -}}
+      </p>
+      {{- end }}
+      {{- with .Title }}<h1 class="p-name">{{ . }}</h1>{{ end }}
+      {{- if $dated }}
+      <p class="entry-meta">
+        <a class="u-url u-uid" href="{{ .Permalink }}" rel="bookmark"><time class="dt-published" datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">{{ .Date.Format "2 January 2006" }}</time></a>
+        {{- if ge .ReadingTime 3 }} · {{ .ReadingTime }} min read{{ end }}
+      </p>
+      {{- end }}
+    </header>
+
+    <div class="entry-body prose{{ if $dated }} e-content{{ end }}">{{ $body }}</div>
+
+    {{- if eq $k.kind "deep-dive" }}
+    <p class="entry-course"><a href="{{ $k.course.RelPermalink }}">From the {{ $k.course.Title }} course →</a></p>
+    {{- end }}
+
+    {{- if $dated }}
+    <a class="p-author h-card" href="{{ $a.url }}" hidden>{{ with $a.avatar }}<img class="u-photo" src="{{ . }}" alt="">{{ end }}<span class="p-name">{{ $a.name }}</span></a>
+    {{- end }}
+  </div>
+</article>
+{{- /* a brand-new student arriving from a flyer: the signup is the next step */ -}}
+{{- if and (not $dated) (eq $title "start here") }}
+{{ partial "signup.html" . }}
+{{- end }}

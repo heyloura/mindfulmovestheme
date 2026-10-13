@@ -1,0 +1,80 @@
+{{/*
+  An episode: a lesson inside its course.
+
+  Desktop: the course sidebar (bamboo stalk) on the left, the lesson on the
+  right. Phone: the sidebar becomes a drawer above the lesson, whose summary
+  row says where you are and lays the stalk on its side. It's a <details>, so
+  it works with scripts off (open); ui.js closes it on narrow screens and
+  keeps it open, summary hidden, on wide ones.
+
+  No date shows, on purpose; dt-published stays in the markup for feeds and
+  parsers. The video is simply the post's own embed, from any provider.
+*/}}
+{{- $a := partial "author.html" . -}}
+{{- $k := partialCached "post-kind.html" . .RelPermalink -}}
+{{- $ep := $k.episode -}}
+{{- $course := $k.course -}}
+{{- $family := "" -}}
+{{- range partialCached "courses-list.html" "courses" }}{{ if and .page (eq .page.RelPermalink $course.RelPermalink) }}{{ $family = .family }}{{ end }}{{ end -}}
+{{- $body := partial "strip-card-image.html" .Content -}}
+{{- $body = partial "responsive-img.html" (dict "html" $body "sizes" "(max-width: 52rem) calc(100vw - 2rem), 52rem") -}}
+
+<div class="wrap episode">
+  <aside class="episode-side" aria-label="{{ $course.Title }} lessons">
+    <details class="course-drawer" open data-course-drawer>
+      <summary class="drawer-summary">
+        <span class="drawer-where">
+          <span class="eyebrow">{{ $course.Title }} · Lesson {{ $ep.lesson.n }}</span>
+          <span class="drawer-title">{{ .Title }}</span>
+        </span>
+        {{ partial "mini-stalk.html" (dict "lessons" $ep.lessons "current" $ep.lesson.n) }}
+        <svg class="drawer-chevron" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </summary>
+      <div class="drawer-body">
+        <div class="side-head">
+          <p class="eyebrow">Course{{ with $family }} · {{ . }}{{ end }}</p>
+          <p class="side-course"><a href="{{ $course.RelPermalink }}">{{ $course.Title }}</a></p>
+          <p class="side-count">{{ $ep.released }} video{{ if ne $ep.released 1 }}s{{ end }}</p>
+          {{ partial "course-complete.html" $course }}
+        </div>
+        {{ partial "bamboo.html" (dict "lessons" $ep.lessons "current" $ep.lesson.n "course" $course) }}
+      </div>
+    </details>
+  </aside>
+
+  <article class="episode-main h-entry">
+    <header class="episode-head">
+      <p class="eyebrow"><a class="p-category" href="{{ $course.RelPermalink }}">{{ $course.Title }}</a> · Lesson {{ $ep.lesson.n }}</p>
+      <h1 class="p-name">{{ .Title }}</h1>
+      <a class="u-url u-uid" href="{{ .Permalink }}" hidden><time class="dt-published" datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}"></time></a>
+    </header>
+
+    <div class="episode-body prose e-content">{{ $body }}</div>
+
+    {{ partial "practice.html" (dict "page" . "course" $course) }}
+
+    {{- with partial "cue-card-for.html" (dict "page" . "course" $course) }}
+    <p class="episode-cue"><a class="btn" href="{{ .RelPermalink }}">Print the cue card</a></p>
+    {{- end }}
+
+    {{- with partial "backlinks.html" . }}
+    <section class="go-deeper" aria-labelledby="deeper-h">
+      <h2 id="deeper-h" class="eyebrow">Go deeper</h2>
+      <div class="cards cards--compact">
+        {{- range . }}{{ partial "card.html" . }}{{ end }}
+      </div>
+    </section>
+    {{- end }}
+
+    <nav class="lesson-nav" aria-label="Lessons in {{ $course.Title }}">
+      {{- with $ep.prev }}
+      <a class="lesson-nav-prev" rel="prev" href="{{ .episode.RelPermalink }}"><span class="eyebrow">← Lesson {{ .n }}</span><span class="lesson-nav-title">{{ .title }}</span></a>
+      {{- end }}
+      {{- with $ep.next }}
+      <a class="lesson-nav-next" rel="next" href="{{ .episode.RelPermalink }}"><span class="eyebrow">Lesson {{ .n }} →</span><span class="lesson-nav-title">{{ .title }}</span></a>
+      {{- end }}
+    </nav>
+
+    <a class="p-author h-card" href="{{ $a.url }}" hidden>{{ with $a.avatar }}<img class="u-photo" src="{{ . }}" alt="">{{ end }}<span class="p-name">{{ $a.name }}</span></a>
+  </article>
+</div>

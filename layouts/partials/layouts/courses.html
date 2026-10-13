@@ -1,0 +1,30 @@
+{{/*
+  The Courses page: your intro, then the courses as cards, grouped under the
+  family headings you wrote. The list you typed is read (courses-list.html)
+  and drawn as cards, so only the words before the first heading or list are
+  shown as text.
+*/}}
+{{- $courses := partialCached "courses-list.html" "courses" -}}
+{{- $intro := index (split (string .Content) "<h2") 0 -}}
+{{- $intro = index (split $intro "<h3") 0 -}}
+{{- $intro = index (split $intro "<ul") 0 -}}
+<section class="section">
+  <div class="wrap">
+    <header class="list-head list-head--sprig">
+      <div class="section-title"><h1>{{ .Title }}</h1>{{ partial "brush-rule.html" (dict) }}</div>
+      {{- with strings.TrimSpace $intro }}<div class="prose">{{ . | safeHTML }}</div>{{ end }}
+      {{ partial "sprig.html" (dict "class" "list-sprig") }}
+    </header>
+
+    {{- $families := slice }}{{ range $courses }}{{ if not (in $families .family) }}{{ $families = $families | append .family }}{{ end }}{{ end }}
+    {{- range $families }}
+    {{- $fam := . }}
+    <section class="course-family"{{ with $fam }} aria-label="{{ . }}"{{ end }}>
+      {{- with $fam }}<h2 class="family-head">{{ . }}</h2>{{ end }}
+      <div class="cards cards--courses">
+        {{- range $courses }}{{ if eq .family $fam }}{{ partial "course-card.html" . }}{{ end }}{{ end }}
+      </div>
+    </section>
+    {{- end }}
+  </div>
+</section>

@@ -1,0 +1,35 @@
+{{/*
+  The Blog page: your intro, the categories as quiet filters, then every post
+  newest first. The newest 24 are cards; anything older is a plain list of
+  titles, so the page stays light however long the blog gets.
+*/}}
+{{- $posts := partial "posts.html" . -}}
+{{- $cardCount := 24 -}}
+<section class="section">
+  <div class="wrap h-feed">
+    <header class="list-head">
+      <div class="section-title"><h1 class="p-name">{{ .Title }}</h1>{{ partial "brush-rule.html" (dict) }}</div>
+      {{- with .Content }}<div class="prose">{{ . }}</div>{{ end }}
+      {{- with site.Taxonomies.categories }}
+      <nav class="filters" aria-label="Categories">
+        {{- range .ByCount }}<a href="{{ .Page.RelPermalink }}">{{ .Page.Title }}</a>{{ end }}
+      </nav>
+      {{- end }}
+    </header>
+
+    <div class="cards">
+      {{- range first $cardCount $posts }}{{ partial "card.html" . }}{{ end }}
+    </div>
+
+    {{- with after $cardCount $posts }}
+    <section class="older" aria-labelledby="older-h">
+      <h2 id="older-h" class="eyebrow">Older</h2>
+      <ul class="older-list">
+        {{- range . }}
+        <li class="h-entry"><a class="u-url" href="{{ .RelPermalink }}"><span class="p-name">{{ .Title | default (.Summary | plainify | htmlUnescape | truncate 80) }}</span></a> <time class="dt-published quiet" datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">{{ .Date.Format "Jan 2006" }}</time></li>
+        {{- end }}
+      </ul>
+    </section>
+    {{- end }}
+  </div>
+</section>
