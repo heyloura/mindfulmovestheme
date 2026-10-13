@@ -1,0 +1,15 @@
+{{/* Every post, newest first.
+
+     Posts are told from pages by their date, not by section: Micro.blog puts
+     posts in different places depending on how a blog was set up, but
+     standing pages (About, Classes, the course pages…) never carry a date.
+     Same rule as Dragon Gate.
+
+     Usage:  {{ $posts := partial "posts.html" . }}  */}}
+{{- $out := slice -}}
+{{- range site.RegularPages -}}
+  {{- if not .Date.IsZero -}}
+    {{- $out = $out | append . -}}
+  {{- end -}}
+{{- end -}}
+{{- return (sort $out "Date" "desc") -}}

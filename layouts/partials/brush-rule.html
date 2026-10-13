@@ -1,0 +1,10 @@
+{{/*
+  One tapered brush stroke, used as an underline beneath main headings and as
+  the rule on a cue card. It paints itself in, left to right, the first time
+  it scrolls into view (see "paint" in mindful-moves.css and ui.js).
+
+  Usage:  {{ partial "brush-rule.html" (dict "class" "cuecard-rule") }}
+*/}}
+<svg class="brush-rule{{ with .class }} {{ . }}{{ end }}" viewBox="0 0 420 14" preserveAspectRatio="none" aria-hidden="true" focusable="false" data-paint>
+  <path class="paint-sweep" d="M2 8C80 2 240 3 418 6 250 11 90 13 2 8Z" filter="url(#mm-rough)"/>
+</svg>

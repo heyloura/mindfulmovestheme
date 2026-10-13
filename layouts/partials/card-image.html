@@ -1,0 +1,28 @@
+{{/*
+  The picture for a page's card, as a dict (src, alt, marked), or false.
+
+  In order:
+    1. an <img> with class="card-image"   (marked: true; the page itself hides it)
+    2. otherwise the first <img> in the content
+    3. otherwise false, and the card is text only
+
+  Nothing here knows about video providers. An episode's card picture is a
+  still you put in the post, never something derived from an embed URL, so
+  changing providers never touches the theme.
+
+  Usage:  {{ with partial "card-image.html" $page }}<img src="{{ .src }}" alt="{{ .alt }}">{{ end }}
+*/}}
+{{- $html := string .Content -}}
+{{- $tag := "" -}}
+{{- with findRE `<img\s[^>]*class="[^"]*\bcard-image\b[^"]*"[^>]*>` $html 1 }}{{ $tag = index . 0 }}{{ end -}}
+{{- $marked := ne $tag "" -}}
+{{- if not $tag }}{{ with findRE `<img\s[^>]*>` $html 1 }}{{ $tag = index . 0 }}{{ end }}{{ end -}}
+{{- $out := false -}}
+{{- with $tag -}}
+  {{- $src := "" -}}
+  {{- with findRESubmatch `\ssrc="([^"]*)"` . 1 }}{{ $src = htmlUnescape (index (index . 0) 1) }}{{ end -}}
+  {{- $alt := "" -}}
+  {{- with findRESubmatch `\salt="([^"]*)"` . 1 }}{{ $alt = htmlUnescape (index (index . 0) 1) }}{{ end -}}
+  {{- if $src }}{{ $out = dict "src" $src "alt" $alt "marked" $marked }}{{ end -}}
+{{- end -}}
+{{- return $out -}}

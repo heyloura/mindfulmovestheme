@@ -1,0 +1,29 @@
+{{/*
+  The notice band, on every page while a page titled "Notice" exists.
+
+  An optional line "Until: 2026-10-21" sets when it stops. Hugo only rebuilds
+  when you post, so the build can't be trusted to drop it on time: the band
+  carries the date and ui.js hides it once that day has passed in the reader's
+  own time zone. If the date has already passed when the site builds, the band
+  isn't written at all.
+
+  The Until line itself is never shown.
+*/}}
+{{- with partial "page-by-title.html" "Notice" -}}
+  {{- $html := string .Content -}}
+  {{- $until := "" -}}
+  {{- with findRESubmatch `(?i)until:\s*(\d{4}-\d{2}-\d{2})` $html 1 }}{{ $until = index (index . 0) 1 }}{{ end -}}
+  {{- $msg := replaceRE `(?is)<p>\s*until:\s*\d{4}-\d{2}-\d{2}\s*</p>\s*` "" $html -}}
+  {{- $msg = replaceRE `(?i)until:\s*\d{4}-\d{2}-\d{2}\s*(<br\s*/?>)?\s*` "" $msg -}}
+  {{- $msg = replaceRE `(?s)^\s*<p>(.*)</p>\s*$` "$1" (strings.TrimSpace $msg) -}}
+  {{- $expired := false -}}
+  {{- with $until }}{{ if lt (time.AsTime (printf "%sT23:59:59" .)) now }}{{ $expired = true }}{{ end }}{{ end -}}
+  {{- if and (strings.TrimSpace $msg) (not $expired) }}
+<aside class="notice" aria-label="Notice"{{ with $until }} data-until="{{ . }}"{{ end }}>
+  <div class="wrap notice-inner">
+    <span class="notice-label">Notice</span>
+    <div class="notice-text">{{ $msg | safeHTML }}</div>
+  </div>
+</aside>
+  {{- end -}}
+{{- end -}}

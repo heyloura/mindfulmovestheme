@@ -1,0 +1,44 @@
+{{/*
+  The seal: a square red chop holding a brush yin-yang. The lower half is paper
+  with a red eye; the upper half is red with a paper eye.
+
+    .size     rendered size in px (default 44)
+    .flat     true for print, email and anything that must not carry texture
+    .class    extra classes
+
+  Under 48px the texture can't read, so the seal goes flat on its own, and under
+  24px it also drops the eyes and thickens the strokes so the favicon holds up.
+  Print turns every seal flat in CSS (see "print" in mindful-moves.css), so the
+  swirl only ever appears where a screen can show it.
+
+  Colours come from CSS classes, not attributes, so night mode can repaint it:
+  the paper parts become inkstone and the red brightens.
+
+  Usage:  {{ partial "seal.html" (dict "size" 44) }}
+*/}}
+{{- $size := .size | default 44 -}}
+{{- $flat := or .flat (lt $size 48) -}}
+{{- $tiny := lt $size 24 -}}
+<svg class="seal{{ with .class }} {{ . }}{{ end }}" viewBox="0 0 220 220" width="{{ $size }}" height="{{ $size }}" aria-hidden="true" focusable="false">
+{{- if $flat }}
+  <rect class="seal-red" x="10" y="10" width="200" height="200" rx="12"/>
+  {{- if $tiny }}
+  <path class="seal-paper" d="M110 30 A80 80 0 0 0 110 190 A40 40 0 0 0 110 110 A40 40 0 0 1 110 30 Z"/>
+  <circle class="seal-paper-stroke" cx="110" cy="110" r="80" stroke-width="18"/>
+  {{- else }}
+  <path class="seal-paper" d="M110 40 A70 70 0 0 0 110 180 A35 35 0 0 0 110 110 A35 35 0 0 1 110 40 Z"/>
+  <circle class="seal-paper-stroke" cx="110" cy="110" r="70" stroke-width="{{ if lt $size 40 }}16{{ else }}12{{ end }}" stroke-dasharray="395 45" transform="rotate(-70 110 110)"/>
+  <circle class="seal-red" cx="110" cy="145" r="{{ if lt $size 40 }}16{{ else }}12{{ end }}"/>
+  <circle class="seal-paper" cx="110" cy="75" r="{{ if lt $size 40 }}16{{ else }}11{{ end }}"/>
+  {{- end }}
+{{- else }}
+  <rect class="seal-red" x="14" y="14" width="192" height="192" rx="10" filter="url(#mm-rough)"/>
+  <rect class="seal-vein" x="18" y="18" width="184" height="184" rx="8" filter="url(#mm-swirl)"/>
+  <rect class="seal-vein-light" x="18" y="18" width="184" height="184" rx="8" filter="url(#mm-swirl-light)"/>
+  <path class="seal-paper" d="M110 40 A70 70 0 0 0 110 180 A35 35 0 0 0 110 110 A35 35 0 0 1 110 40 Z" filter="url(#mm-rough)"/>
+  <circle class="seal-paper-stroke" cx="110" cy="110" r="70" stroke-width="9" stroke-dasharray="395 45" transform="rotate(-70 110 110)" filter="url(#mm-rough)"/>
+  <path class="seal-paper-stroke" d="M110 40 A35 35 0 0 0 110 110 A35 35 0 0 1 110 180" stroke-width="7" filter="url(#mm-rough)"/>
+  <circle class="seal-red" cx="110" cy="145" r="10.5"/>
+  <circle class="seal-paper" cx="110" cy="75" r="10"/>
+{{- end }}
+</svg>

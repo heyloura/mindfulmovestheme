@@ -1,0 +1,19 @@
+{{/*
+  A link as a site-relative path with no trailing slash ("/2026/09/14/x.html",
+  "/yang-8"), or "" if it points at another site.
+
+  Links you write in Micro.blog may be relative or absolute, with or without
+  www, so both sides of every comparison go through here.
+
+  Usage:  {{ $rel := partial "href-to-rel.html" "https://mindfulmovestaichi.com/yang-8/" }}
+*/}}
+{{- $u := urls.Parse (string .) -}}
+{{- $site := urls.Parse site.BaseURL -}}
+{{- $host := strings.TrimPrefix "www." (lower $u.Host) -}}
+{{- $siteHost := strings.TrimPrefix "www." (lower $site.Host) -}}
+{{- $out := "" -}}
+{{- if or (eq $host "") (eq $host $siteHost) -}}
+  {{- $out = strings.TrimSuffix "/" $u.Path -}}
+  {{- if eq $out "" }}{{ $out = "/" }}{{ end -}}
+{{- end -}}
+{{- return $out -}}

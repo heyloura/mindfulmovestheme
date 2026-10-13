@@ -1,0 +1,42 @@
+{{/*
+  What a page is, for choosing its layout and its card label.
+
+  Returns a dict:
+    kind     "page" | "cue-card" | "episode" | "deep-dive" | "note" | "post"
+    course   the course page (episodes and deep dives), else false
+    episode  the episode-of.html dict (episodes only), else false
+
+  In order: undated → page. In Cue Cards → cue-card. Pointed at by a course
+  outline → episode. Otherwise in a course's category → deep-dive. No title →
+  note (a Micro.blog micropost). Anything else → post.
+
+  Usage:  {{ $k := partialCached "post-kind.html" . .RelPermalink }}
+*/}}
+{{- $page := . -}}
+{{- $kind := "post" -}}
+{{- $course := false -}}
+{{- $episode := false -}}
+{{- $cats := slice -}}
+{{- range $page.Params.categories }}{{ $cats = $cats | append (partial "norm-title.html" .) }}{{ end -}}
+
+{{- if $page.Date.IsZero -}}
+  {{- $kind = "page" -}}
+{{- else if in $cats "cue cards" -}}
+  {{- $kind = "cue-card" -}}
+{{- else -}}
+  {{- with partialCached "episode-of.html" $page $page.RelPermalink -}}
+    {{- $kind = "episode" -}}
+    {{- $episode = . -}}
+    {{- $course = .course -}}
+  {{- else -}}
+    {{- range $page.Params.categories -}}
+      {{- if not $course -}}
+        {{- with partial "page-by-title.html" . -}}
+          {{- if gt (len (partialCached "course-lessons.html" . .RelPermalink)) 0 }}{{ $course = . }}{{ end -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+    {{- if $course }}{{ $kind = "deep-dive" }}{{ else if not $page.Title }}{{ $kind = "note" }}{{ end -}}
+  {{- end -}}
+{{- end -}}
+{{- return (dict "kind" $kind "course" $course "episode" $episode) -}}

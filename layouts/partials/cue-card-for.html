@@ -1,0 +1,29 @@
+{{/*
+  The cue card that goes with an episode, or false.
+
+  A cue card pairs with an episode by title. Moves repeat across forms (Cloud
+  Hands is in Yang 8 and Yang 24), so a cue card that ALSO carries a course
+  category pairs only with that course's episode; one in Cue Cards alone pairs
+  with the same-titled episode in any course. The newest match wins.
+
+  Input: dict "page" (the episode) "course" (its course page)
+  Usage: {{ with partial "cue-card-for.html" (dict "page" . "course" $course) }}…{{ end }}
+*/}}
+{{- $key := partial "norm-title.html" .page.Title -}}
+{{- $courseKey := partial "norm-title.html" .course.Title -}}
+{{- $any := false -}}
+{{- $mine := false -}}
+{{- range partial "posts.html" . -}}
+  {{- if eq (partial "norm-title.html" .Title) $key -}}
+    {{- $cats := slice -}}
+    {{- range .Params.categories }}{{ $cats = $cats | append (partial "norm-title.html" .) }}{{ end -}}
+    {{- if in $cats "cue cards" -}}
+      {{- if in $cats $courseKey -}}
+        {{- if not $mine }}{{ $mine = . }}{{ end -}}
+      {{- else if eq (len $cats) 1 -}}
+        {{- if not $any }}{{ $any = . }}{{ end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- return (or $mine $any) -}}

@@ -1,0 +1,39 @@
+{{/*
+  What the home page hero shows, read from the page titled "Home".
+
+  Returns a dict:
+    welcome  the first paragraph that is just words (not the video link,
+             not a picture), as plain text, or ""
+    video    dict (src, type) for the first link or path to a video FILE
+             (.mp4 .webm .m4v .mov), or false. It must be the file itself,
+             not a player embed: a background loop can't be an iframe.
+    poster   card-image.html for the page: the still shown while the video
+             loads, and instead of it for anyone who prefers less motion
+
+  Usage:  {{ $hero := partial "home-hero.html" . }}
+*/}}
+{{- $out := dict "welcome" "" "video" false "poster" false -}}
+{{- with partial "page-by-title.html" "Home" -}}
+  {{- $html := string .Content -}}
+  {{- $vidRe := `[^\s"'<>]+\.(?:mp4|webm|m4v|mov)(?:\?[^\s"'<>]*)?` -}}
+
+  {{- $video := false -}}
+  {{- with findRE $vidRe $html 1 -}}
+    {{- $src := htmlUnescape (index . 0) -}}
+    {{- $ext := lower (replaceRE `^.*\.([A-Za-z0-9]+)(?:\?.*)?$` "$1" $src) -}}
+    {{- $type := index (dict "mp4" "video/mp4" "m4v" "video/mp4" "webm" "video/webm" "mov" "video/quicktime") $ext -}}
+    {{- $video = dict "src" $src "type" $type -}}
+  {{- end -}}
+
+  {{- $welcome := "" -}}
+  {{- range findRESubmatch `(?s)<p[^>]*>(.*?)</p>` $html -}}
+    {{- $inner := index . 1 -}}
+    {{- $text := $inner | plainify | htmlUnescape | strings.TrimSpace -}}
+    {{- if and (not $welcome) $text (not (strings.Contains $inner "<img")) (not (findRE (printf `^%s$` $vidRe) $text)) -}}
+      {{- $welcome = $text -}}
+    {{- end -}}
+  {{- end -}}
+
+  {{- $out = dict "welcome" $welcome "video" $video "poster" (partial "card-image.html" .) -}}
+{{- end -}}
+{{- return $out -}}

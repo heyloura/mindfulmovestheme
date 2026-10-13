@@ -1,0 +1,12 @@
+{{/*
+  Every regular page keyed by its site-relative path (see href-to-rel.html),
+  so a link written in a post or a course outline can be turned back into the
+  page it points at. Built once per build.
+
+  Usage:  {{ $urls := partialCached "url-index.html" "urls" }}  {{ index $urls "/yang-8" }}
+*/}}
+{{- $s := newScratch -}}
+{{- range site.RegularPages -}}
+  {{- $s.Set (partial "href-to-rel.html" .RelPermalink) . -}}
+{{- end -}}
+{{- return $s.Values -}}

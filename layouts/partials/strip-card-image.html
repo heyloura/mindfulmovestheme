@@ -1,0 +1,14 @@
+{{/*
+  Rendered HTML with any class="card-image" pictures taken out, for showing a
+  post or page itself. The card image belongs on the card; inside the post it
+  would just repeat the video. Feeds and the newsletter use the content as
+  written, so subscribers still get the picture where email can't play video.
+
+  Handles the image on its own line (an HTML block) and wrapped in <p>.
+
+  Usage:  {{ $body := partial "strip-card-image.html" .Content }}
+*/}}
+{{- $html := string . -}}
+{{- $html = replaceRE `<p>\s*<img\s[^>]*class="[^"]*\bcard-image\b[^"]*"[^>]*>\s*</p>\s*` "" $html -}}
+{{- $html = replaceRE `<img\s[^>]*class="[^"]*\bcard-image\b[^"]*"[^>]*>\s*` "" $html -}}
+{{- return ($html | safeHTML) -}}

@@ -1,0 +1,39 @@
+{{/*
+  The weekly classes, read from the page titled "Classes".
+
+  Each class is one list item that starts with a day and a time, then a colon:
+    Tuesday 9:00 am: Now & Women's Gym, beginners welcome
+    Thurs 6:30pm: [Location], all levels
+    Saturday 10: The park
+  Anything after the colon is free text. List items that don't start with a
+  day and time are left alone (they show on the page, but never as "next").
+
+  Returns a slice of dicts, in page order:
+    i      the item's position among ALL list items on the page (so the page
+           can mark the right one)
+    day    0 = Sunday … 6 = Saturday
+    h, m   24-hour start time
+    label  the day and time as you wrote them
+    where  the rest of the line
+
+  The next class is worked out in the reader's browser (ui.js), because a
+  static site can't know what day it is when someone visits.
+*/}}
+{{- $days := dict "sun" 0 "mon" 1 "tue" 2 "wed" 3 "thu" 4 "fri" 5 "sat" 6 -}}
+{{- $out := slice -}}
+{{- with partial "page-by-title.html" "Classes" -}}
+  {{- range $i, $li := findRESubmatch `(?s)<li[^>]*>(.*?)</li>` (string .Content) -}}
+    {{- $text := index $li 1 | plainify | htmlUnescape | strings.TrimSpace -}}
+    {{- with findRESubmatch `(?i)^((mon|tue|wed|thu|fri|sat|sun)[a-z]*\.?\s+(\d{1,2})(?:[:.](\d{2}))?\s*(a\.?m\.?|p\.?m\.?)?)\s*[:–—-]\s*(.+)$` $text 1 -}}
+      {{- $g := index . 0 -}}
+      {{- /* leading zeros trimmed first: "09" would otherwise read as octal */ -}}
+      {{- $h := int (strings.TrimLeft "0" (index $g 3) | default "0") -}}
+      {{- $m := 0 }}{{ with index $g 4 }}{{ $m = int (strings.TrimLeft "0" . | default "0") }}{{ end -}}
+      {{- $ampm := lower (replace (index $g 5) "." "") -}}
+      {{- if and (eq $ampm "pm") (lt $h 12) }}{{ $h = add $h 12 }}{{ end -}}
+      {{- if and (eq $ampm "am") (eq $h 12) }}{{ $h = 0 }}{{ end -}}
+      {{- $out = $out | append (dict "i" $i "day" (index $days (lower (index $g 2))) "h" $h "m" $m "label" (strings.TrimSpace (index $g 1)) "where" (strings.TrimSpace (index $g 6))) -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- return $out -}}

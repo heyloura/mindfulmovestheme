@@ -1,0 +1,35 @@
+{{/*
+  "I practiced this", on episode pages. One tap does two things:
+
+  1. A Tinylytics kudos: an anonymous public count ("12 people practiced
+     this"), one per browser per lesson. Tinylytics fills its own kudos button
+     with the count and disables it after a tap, so it can't carry our label:
+     it sits hidden here, our button taps it, and ui.js reads its count back.
+     No Tinylytics code set, no count; the button still works.
+  2. A leaf on this reader's bamboo, but only once they've said yes. The
+     first tap asks; nothing is stored in their browser before "Keep my
+     progress", and "No thanks" stores nothing at all.
+
+  Scripts only: without them this does nothing, so it isn't shown.
+
+  Usage:  {{ partial "practice.html" (dict "page" . "course" $course) }}
+*/}}
+{{- $p := .page -}}
+<div class="practice" data-practice data-course="{{ partial "href-to-rel.html" .course.RelPermalink }}" data-lesson="{{ partial "href-to-rel.html" $p.RelPermalink }}">
+  <div class="practice-row">
+    <button class="btn btn--action practice-btn" type="button" data-practice-btn data-tinylytics-event="lesson.practiced" data-tinylytics-event-value="{{ .course.Title }} · {{ $p.Title }}">I practiced this</button>
+    <span class="practice-count" data-practice-count hidden></span>
+  </div>
+  <p class="practice-status" data-practice-status role="status" aria-live="polite"></p>
+  <div class="practice-ask" data-practice-ask hidden>
+    <p>Keep track of your progress? A leaf grows on your bamboo for each lesson you practice. It’s saved in this browser only.</p>
+    <p class="practice-ask-buttons">
+      <button class="btn" type="button" data-practice-keep>Keep my progress</button>
+      <button class="btn-link" type="button" data-practice-no>No thanks</button>
+    </p>
+  </div>
+  <p class="practice-forget" data-practice-forget hidden><button class="btn-link" type="button">Forget my progress</button></p>
+  {{- if site.Params.tinylytics }}
+  <button class="tinylytics_kudos practice-kudos" type="button" tabindex="-1" aria-hidden="true" data-path="{{ $p.RelPermalink }}"></button>
+  {{- end }}
+</div>

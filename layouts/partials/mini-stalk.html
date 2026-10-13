@@ -1,0 +1,13 @@
+{{/*
+  The bamboo laid on its side, small: the phone course drawer's summary row.
+  Same three states as bamboo.html (inked, faint, leaf). Decorative; the
+  drawer's text says where you are.
+
+  Usage:  {{ partial "mini-stalk.html" (dict "lessons" $l "current" 5) }}
+*/}}
+{{- $cur := .current | default 0 -}}
+<span class="mini-stalk" aria-hidden="true" data-mini-stalk>
+  {{- range .lessons }}
+  <span class="mini-seg {{ if .episode }}is-filmed{{ else }}is-unfilmed{{ end }}{{ if eq .n $cur }} is-current{{ end }}"{{ with .episode }} data-lesson="{{ partial "href-to-rel.html" .RelPermalink }}"{{ end }}><span class="mini-leaf"></span></span>
+  {{- end }}
+</span>

@@ -1,0 +1,33 @@
+{{/*
+  One course from courses-list.html as a card: picture, family, name, and
+  either a video count, Coming soon, or Members (a course on another site).
+
+  Just a count, never "5 of 10": how far along the filming is isn't a promise
+  the card should make.
+
+  Usage:  {{ partial "course-card.html" $course }}
+*/}}
+{{- $c := . -}}
+<article class="course-card{{ if $c.members }} course-card--members{{ end }}{{ if not $c.released }} course-card--soon{{ end }}">
+  <div class="card-img">
+    {{- with $c.image }}
+    {{- $set := partial "photo-srcset.html" .src }}
+    <img src="{{ .src }}"{{ with $set }} srcset="{{ . }}" sizes="(max-width: 40rem) calc(100vw - 2rem), 20rem"{{ end }} alt="{{ .alt }}" loading="lazy" decoding="async">
+    {{- end }}
+    {{- if $c.members }}
+    <span class="members-badge">
+      <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="5" y="11" width="14" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+      Members
+    </span>
+    {{- end }}
+  </div>
+  {{- with $c.family }}<p class="eyebrow card-eyebrow">{{ . }}</p>{{ end }}
+  <h3 class="card-title">
+    {{- if $c.url }}<a class="card-link" href="{{ $c.url }}">{{ $c.name }}</a>{{ else }}{{ $c.name }}{{ end -}}
+  </h3>
+  <p class="card-meta">
+    {{- if $c.members }}On the members site →
+    {{- else if $c.released }}{{ $c.released }} video{{ if ne $c.released 1 }}s{{ end }}
+    {{- else }}Coming soon{{ end -}}
+  </p>
+</article>

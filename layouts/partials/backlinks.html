@@ -1,0 +1,9 @@
+{{/*
+  The posts that link to this page, newest first. On an episode these are
+  its deep dives ("Go deeper").
+
+  Usage:  {{ range partial "backlinks.html" . }}…{{ end }}
+*/}}
+{{- $links := partialCached "link-index.html" "links" -}}
+{{- $out := index $links (partial "href-to-rel.html" .RelPermalink) | default slice -}}
+{{- return (sort $out "Date" "desc") -}}

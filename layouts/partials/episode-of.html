@@ -1,0 +1,44 @@
+{{/*
+  If this post is an episode, where it sits in its course; otherwise false.
+
+  Returns a dict:
+    course   the course page
+    lesson   this post's outline line (see course-lessons.html)
+    lessons  the whole outline
+    prev     the nearest earlier FILMED lesson, or false
+    next     the nearest later filmed lesson, or false
+    released how many lessons have episodes
+
+  A post is an episode when one of its categories names a course page and
+  that course's outline points at this post.
+
+  Usage:  {{ with partialCached "episode-of.html" . .RelPermalink }}Lesson {{ .lesson.n }}{{ end }}
+*/}}
+{{- $page := . -}}
+{{- $out := false -}}
+{{- if not $page.Date.IsZero -}}
+  {{- range $page.Params.categories -}}
+    {{- if not $out -}}
+      {{- with partial "page-by-title.html" . -}}
+        {{- $course := . -}}
+        {{- $lessons := partialCached "course-lessons.html" $course $course.RelPermalink -}}
+        {{- $me := false -}}
+        {{- $released := 0 -}}
+        {{- range $lessons -}}
+          {{- if .episode }}{{ $released = add $released 1 }}{{ end -}}
+          {{- if and .episode (eq .episode.RelPermalink $page.RelPermalink) }}{{ $me = . }}{{ end -}}
+        {{- end -}}
+        {{- with $me -}}
+          {{- $prev := false -}}
+          {{- $next := false -}}
+          {{- range $lessons -}}
+            {{- if and .episode (lt .n $me.n) }}{{ $prev = . }}{{ end -}}
+            {{- if and .episode (gt .n $me.n) (not $next) }}{{ $next = . }}{{ end -}}
+          {{- end -}}
+          {{- $out = dict "course" $course "lesson" $me "lessons" $lessons "prev" $prev "next" $next "released" $released -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- return $out -}}

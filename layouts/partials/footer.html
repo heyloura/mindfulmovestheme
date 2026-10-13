@@ -1,0 +1,42 @@
+{{/*
+  Footer: the flat seal and the full name, the site's representative h-card,
+  a few quiet links, the feeds, and Micro.blog's plugin hooks.
+
+  Classes, About, Newsletter and Credits are found by page title, so the
+  links appear the moment those pages exist and vanish if they don't.
+  On a category page the category's own feed is offered beside the main one,
+  so someone who only wants Yang 8 can follow just Yang 8.
+*/}}
+{{- $a := partial "author.html" . -}}
+{{- $links := slice -}}
+{{- range $pair := slice (slice "Classes" "Classes") (slice "About" "About") (slice "Subscribe" "Newsletter") (slice "Credits" "Credits") -}}
+  {{- with partial "page-by-title.html" (index $pair 0) -}}
+    {{- $links = $links | append (dict "url" .RelPermalink "name" (index $pair 1)) -}}
+  {{- end -}}
+{{- end -}}
+<footer class="site-foot">
+  <div class="wrap foot-inner">
+    <div class="foot-card h-card">
+      {{ partial "seal.html" (dict "size" 40 "flat" true) }}
+      <div class="foot-who">
+        <a class="foot-name p-name u-url u-uid" href="{{ $a.url }}">{{ site.Title }}</a>
+        {{- with $a.avatar }}<img class="u-photo" src="{{ . }}" alt="" hidden>{{ end }}
+        <p class="foot-profiles">
+          {{- with $a.username }}<a class="u-url" rel="me" href="https://micro.blog/{{ . }}">Micro.blog</a>{{ end }}
+          {{- with site.Params.fediverse }}<a class="u-url" rel="me" href="{{ . }}">Fediverse</a>{{ end }}
+        </p>
+      </div>
+    </div>
+
+    <nav class="foot-nav" aria-label="Footer">
+      {{- range $links }}<a href="{{ .url }}">{{ .name }}</a>{{ end }}
+      {{- with site.Home.OutputFormats.Get "rss" }}<a href="{{ .RelPermalink }}" type="application/rss+xml">RSS</a>{{ end }}
+      {{- if eq $.Kind "term" }}{{ with $.OutputFormats.Get "rss" }}<a href="{{ .RelPermalink }}" type="application/rss+xml">{{ $.Title }} RSS</a>{{ end }}{{ end }}
+    </nav>
+  </div>
+</footer>
+<script src="{{ "js/ui.js" | relURL }}" defer></script>
+{{- range site.Params.plugins_js }}
+<script src="{{ . }}" defer></script>
+{{- end }}
+{{ partial "custom_footer.html" . }}

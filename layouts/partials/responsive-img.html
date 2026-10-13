@@ -1,0 +1,25 @@
+{{/*
+  Adds srcset + sizes to every Micro.blog-hosted JPEG in a chunk of rendered
+  HTML (see photo-srcset.html for why). The original src is left untouched, so
+  microformats parsers and feed readers still get the full-resolution photo.
+
+    .html  — rendered content
+    .sizes — the `sizes` attribute for this context: how wide the image
+             actually displays, so the browser can pick the right copy
+
+  Usage:  {{ partial "responsive-img.html" (dict "html" .Content "sizes" "600px") }}
+*/}}
+{{- $html := string .html -}}
+{{- $sizes := .sizes -}}
+{{- range $tag := uniq (findRE `<img[^>]+>` $html) -}}
+  {{- if not (strings.Contains $tag "srcset") -}}
+    {{- with findRESubmatch `\ssrc="([^"]+)"` $tag 1 -}}
+      {{- $set := partial "photo-srcset.html" (index (index . 0) 1) -}}
+      {{- if $set -}}
+        {{- $new := replaceRE `^<img\s` (printf `<img srcset="%s" sizes="%s" ` $set $sizes) $tag 1 -}}
+        {{- $html = replace $html $tag $new -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- return ($html | safeHTML) -}}

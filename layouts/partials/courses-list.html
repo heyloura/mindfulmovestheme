@@ -1,0 +1,68 @@
+{{/*
+  The courses, in the order and families written on the Courses page.
+
+  The Courses page is a few headings (the families: Forms, Qigong…) each with
+  a list under it. Each line is either
+    - plain text: a course on this site, found by its page title, or
+    - a link to another site: a members course, shown locked; put its card
+      picture in the same line.
+
+  Returns a slice of dicts:
+    family   the heading above the line
+    name     the line's text
+    page     the course page (local courses), else false
+    url      where the card links
+    members  true for a course on another site
+    image    card picture dict (see card-image.html), else false
+    lessons  the outline (local courses), else an empty slice
+    released how many lessons have episodes
+
+  A local line whose page doesn't exist yet still appears, as Coming soon.
+
+  Usage:  {{ $courses := partialCached "courses-list.html" "courses" }}
+*/}}
+{{- $out := slice -}}
+{{- with partial "page-by-title.html" "Courses" -}}
+  {{- $family := "" -}}
+  {{- range findRE `(?s)<h[23][^>]*>.*?</h[23]>|<li[^>]*>.*?</li>` (string .Content) -}}
+    {{- if hasPrefix . "<h" -}}
+      {{- $family = . | plainify | htmlUnescape | strings.TrimSpace -}}
+    {{- else -}}
+      {{- $line := . -}}
+      {{- $name := $line | plainify | htmlUnescape | strings.TrimSpace -}}
+      {{- $href := "" -}}
+      {{- with findRESubmatch `href="([^"]+)"` $line 1 }}{{ $href = htmlUnescape (index (index . 0) 1) }}{{ end -}}
+      {{- $image := false -}}
+      {{- with findRE `<img\s[^>]*>` $line 1 -}}
+        {{- $tag := index . 0 -}}
+        {{- with findRESubmatch `\ssrc="([^"]*)"` $tag 1 -}}
+          {{- $alt := "" -}}
+          {{- with findRESubmatch `\salt="([^"]*)"` $tag 1 }}{{ $alt = htmlUnescape (index (index . 0) 1) }}{{ end -}}
+          {{- $image = dict "src" (htmlUnescape (index (index . 0) 1)) "alt" $alt "marked" true -}}
+        {{- end -}}
+      {{- end -}}
+
+      {{- $members := and $href (eq (partial "href-to-rel.html" $href) "") -}}
+      {{- $page := false -}}
+      {{- if not $members -}}
+        {{- with partial "page-by-title.html" $name }}{{ $page = . }}{{ end -}}
+        {{- if and (not $page) $href -}}
+          {{- with index (partialCached "url-index.html" "urls") (partial "href-to-rel.html" $href) }}{{ $page = . }}{{ end -}}
+        {{- end -}}
+      {{- end -}}
+
+      {{- $lessons := slice -}}
+      {{- $released := 0 -}}
+      {{- $url := $href -}}
+      {{- with $page -}}
+        {{- $lessons = partialCached "course-lessons.html" . .RelPermalink -}}
+        {{- range $lessons }}{{ if .episode }}{{ $released = add $released 1 }}{{ end }}{{ end -}}
+        {{- $url = .RelPermalink -}}
+        {{- if not $image }}{{ $image = partial "card-image.html" . }}{{ end -}}
+      {{- end -}}
+
+      {{- $out = $out | append (dict "family" $family "name" $name "page" $page "url" $url "members" $members "image" $image "lessons" $lessons "released" $released) -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- return $out -}}

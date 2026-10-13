@@ -1,0 +1,43 @@
+{{/*
+  A course outline as a bamboo stalk, one segment per line, read top-down.
+
+    inked segment         the episode is published (the line links to it)
+    faint dashed segment  listed, not filmed yet
+    leaf                  this reader marked it practiced (opt-in, stored on
+                          their device; ui.js adds .is-practiced)
+
+    .lessons  course-lessons.html output
+    .current  the lesson number being viewed, or 0
+    .course   the course page (its path keys this reader's stored progress)
+    .class    extra classes ("bamboo--large" on the course page)
+
+  It's an <ol>, so screen readers hear "list, 10 items" and each position.
+
+  Usage:  {{ partial "bamboo.html" (dict "lessons" $l "current" 5 "course" $c) }}
+*/}}
+{{- $cur := .current | default 0 -}}
+<ol class="bamboo{{ with .class }} {{ . }}{{ end }}" data-bamboo data-paint data-course="{{ partial "href-to-rel.html" .course.RelPermalink }}">
+  {{- range .lessons }}
+  {{- $l := . }}
+  <li class="bamboo-line {{ if .episode }}is-filmed{{ else }}is-unfilmed{{ end }}"{{ if eq .n $cur }} aria-current="step"{{ end }}{{ with .episode }} data-lesson="{{ partial "href-to-rel.html" .RelPermalink }}"{{ end }}>
+    <svg class="bamboo-seg" viewBox="0 0 48 52" width="48" height="52" aria-hidden="true" focusable="false">
+      <path class="bamboo-node" d="M22 1.5Q32 5.5 42 1.5"/>
+      {{- if .episode }}
+      <rect class="bamboo-fill" x="26" y="4" width="12" height="45" rx="3" filter="url(#mm-dry)"/>
+      {{- else }}
+      <rect class="bamboo-outline" x="26.75" y="4.75" width="10.5" height="43.5" rx="3"/>
+      {{- end }}
+      <g class="bamboo-leaf">
+        <path transform="translate(26 6) rotate(158) scale(.38)" d="M0 0C18-8 46-9 70-3 46 1 20 4 0 0Z" filter="url(#mm-rough)"/>
+        <path transform="translate(26 7) rotate(194) scale(.3)" d="M0 0C18-8 46-9 70-3 46 1 20 4 0 0Z" filter="url(#mm-rough)"/>
+      </g>
+    </svg>
+    <span class="bamboo-label">
+      <span class="bamboo-n">{{ .n }}.</span>
+      {{- with .episode }} <a href="{{ .RelPermalink }}">{{ $l.title }}</a>
+      {{- else }} <span class="bamboo-name">{{ $l.title }}</span> <span class="bamboo-status">Not filmed yet</span>
+      {{- end }}
+    </span>
+  </li>
+  {{- end }}
+</ol>

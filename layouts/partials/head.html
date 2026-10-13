@@ -1,0 +1,47 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ .Title }} &middot; {{ site.Title }}{{ end }}</title>
+{{ with site.Params.description }}<meta name="description" content="{{ . }}">{{ end }}
+{{- /* Home and Notice are pages only so they can be edited in Micro.blog; their
+       words show up elsewhere. Keep search engines from listing them alone. */}}
+{{- if and .IsPage .Date.IsZero (in (slice "home" "notice") (partial "norm-title.html" .Title)) }}
+<meta name="robots" content="noindex">
+{{- end }}
+
+{{/* Runs before first paint so an explicit day/night choice never flashes,
+     and so CSS knows scripts are running (the phone menu only folds away
+     when there's a script to open it again).
+
+     "paint-ready" holds brush strokes unpainted until they scroll into view,
+     so it's only set when motion is welcome and the browser can watch for
+     that. If ui.js never arrives to paint them, the class comes off after a
+     few seconds, so a stroke can be late but never missing. */}}
+<script>
+(function(){
+  var d=document.documentElement;
+  d.classList.add("js");
+  if("IntersectionObserver" in window&&!(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)){
+    d.classList.add("paint-ready");
+    setTimeout(function(){if(!window.mmPainting)d.classList.remove("paint-ready");},4000);
+  }
+  try{
+    var t=localStorage.getItem("mm-theme");
+    if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t);
+  }catch(e){}
+})();
+</script>
+
+{{/* Fonts are self-hosted, so a reader's browser never calls Google. Only the
+     two faces every page needs above the fold are preloaded. */}}
+<link rel="preload" href="{{ "fonts/atkinson-hyperlegible-latin-400-normal.woff2" | relURL }}" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{{ "fonts/cormorant-garamond-latin-600-normal.woff2" | relURL }}" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="{{ "css/mindful-moves.css" | relURL }}">
+
+{{ partial "microblog_head.html" . }}
+
+{{/* Tinylytics: page counts, the "I practiced this" kudos (custom: we draw the
+     button, it supplies the count), and events on our own buttons. Events go
+     by beacon so a click that leaves the page (Start here) still counts. */}}
+{{ with site.Params.tinylytics }}
+<script src="https://tinylytics.app/embed/{{ . }}.js?kudos=custom&amp;events&amp;beacon" defer></script>
+{{ end }}

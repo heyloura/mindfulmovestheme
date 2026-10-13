@@ -1,0 +1,27 @@
+{{/*
+  A painted bamboo sprig: decoration, used sparingly (the Courses page, the
+  404) and never on cards. The stalk grows up segment by segment, then the
+  leaves open, the first time it scrolls into view.
+
+  Usage:  {{ partial "sprig.html" (dict "class" "list-sprig") }}
+*/}}
+<svg class="sprig{{ with .class }} {{ . }}{{ end }}" viewBox="0 0 180 230" aria-hidden="true" focusable="false" data-paint>
+  <g class="sprig-stalk">
+    <rect class="paint-grow-up" style="--d: 0" x="90" y="173" width="12" height="54" rx="3" filter="url(#mm-dry)"/>
+    <rect class="paint-grow-up" style="--d: 1" x="90" y="115" width="12" height="52" rx="3" filter="url(#mm-dry)"/>
+    <rect class="paint-grow-up" style="--d: 2" x="90" y="61" width="12" height="48" rx="3" filter="url(#mm-dry)"/>
+    <rect class="paint-grow-up" style="--d: 3" x="91" y="22" width="10" height="33" rx="3" filter="url(#mm-dry)"/>
+  </g>
+  <g class="sprig-nodes">
+    <path class="paint-fade" style="--d: 1" d="M85 170Q96 175 107 170"/>
+    <path class="paint-fade" style="--d: 2" d="M85 112Q96 117 107 112"/>
+    <path class="paint-fade" style="--d: 3" d="M85 58Q96 63 107 58"/>
+  </g>
+  <g class="sprig-leaves">
+    <g transform="translate(90 112) rotate(160)"><path class="paint-leaf" style="--d: 4" d="M0 0C18-8 46-9 70-3 46 1 20 4 0 0Z" filter="url(#mm-rough)"/></g>
+    <g transform="translate(90 114) rotate(192) scale(.8)"><path class="paint-leaf" style="--d: 4.5" d="M0 0C18-8 46-9 70-3 46 1 20 4 0 0Z" filter="url(#mm-rough)"/></g>
+    <g transform="translate(103 58) rotate(22)"><path class="paint-leaf" style="--d: 5" d="M0 0C18-8 46-9 70-3 46 1 20 4 0 0Z" filter="url(#mm-rough)"/></g>
+    <g transform="translate(103 60) rotate(-12) scale(.85)"><path class="paint-leaf" style="--d: 5.5" d="M0 0C18-8 46-9 70-3 46 1 20 4 0 0Z" filter="url(#mm-rough)"/></g>
+    <g transform="translate(103 59) rotate(52) scale(.7)"><path class="paint-leaf" style="--d: 6" d="M0 0C18-8 46-9 70-3 46 1 20 4 0 0Z" filter="url(#mm-rough)"/></g>
+  </g>
+</svg>

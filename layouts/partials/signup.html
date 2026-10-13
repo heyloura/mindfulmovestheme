@@ -1,0 +1,48 @@
+{{/*
+  The signup block, read from the page titled "Subscribe" (Micro.blog makes
+  it when you turn the newsletter on, with the form already in it).
+
+    heading    the page's first heading
+    picture    its first image
+    pitch      its first paragraph of words
+    form       the form Micro.blog put on the page, used as-is
+
+  So the offer (today: the cue card deck) is changed by editing that page,
+  never the theme. With no form on the page there's nothing to sign up to,
+  and the block isn't shown.
+
+  Usage:  {{ partial "signup.html" . }}
+*/}}
+{{- with partial "page-by-title.html" "Subscribe" -}}
+  {{- $html := string .Content -}}
+  {{- $form := "" }}{{ with findRE `(?is)<form\b.*?</form>` $html 1 }}{{ $form = index . 0 }}{{ end -}}
+  {{- /* tag the submit control so Tinylytics counts signups as an event (and goal) */ -}}
+  {{- $form = replaceRE `(?i)<(input\b[^>]*type="submit"|button\b)` `<$1 data-tinylytics-event="newsletter.subscribe"` $form 1 -}}
+  {{- $before := index (split $html "<form") 0 -}}
+  {{- $heading := "" }}{{ with findRESubmatch `(?is)<h[23][^>]*>(.*?)</h[23]>` $before 1 }}{{ $heading = index (index . 0) 1 | plainify | htmlUnescape | strings.TrimSpace }}{{ end -}}
+  {{- $pitch := "" -}}
+  {{- range findRESubmatch `(?s)<p[^>]*>(.*?)</p>` $before -}}
+    {{- if and (not $pitch) (not (strings.Contains (index . 1) "<img")) -}}
+      {{- $t := index . 1 | plainify | htmlUnescape | strings.TrimSpace }}{{ if $t }}{{ $pitch = $t }}{{ end -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $img := partial "card-image.html" . -}}
+  {{- if $form }}
+<section class="signup" aria-labelledby="signup-h">
+  <div class="wrap signup-inner">
+    {{- with $img }}
+    {{- $set := partial "photo-srcset.html" .src }}
+    <div class="signup-pic">
+      <img src="{{ .src }}"{{ with $set }} srcset="{{ . }}" sizes="(max-width: 48rem) calc(100vw - 2rem), 22rem"{{ end }} alt="{{ .alt }}" loading="lazy" decoding="async">
+    </div>
+    {{- end }}
+    <div class="signup-text">
+      <h2 id="signup-h">{{ $heading | default .Title }}</h2>
+      {{- with $pitch }}<p class="signup-pitch">{{ . }}</p>{{ end }}
+      <div class="signup-form">{{ $form | safeHTML }}</div>
+      <p class="signup-note">You’ll get a confirmation email first.</p>
+    </div>
+  </div>
+</section>
+  {{- end -}}
+{{- end -}}

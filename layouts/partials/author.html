@@ -1,0 +1,22 @@
+{{/*
+  The site author, as a dict: name, avatar, username, url.
+
+  Micro.blog passes params.author as a MAP (name / avatar / username), but a
+  hand-written local config often has `author = "Loura"`. Printing the map
+  straight into a template produces "map[avatar:… name:…]" on the live site,
+  so everything reads the author through here instead.
+
+  Usage:  {{ $a := partial "author.html" . }}  {{ $a.name }}
+*/}}
+{{- $raw := site.Params.author -}}
+{{- $name := site.Title -}}
+{{- $avatar := "" -}}
+{{- $username := site.Params.username | default "" -}}
+{{- if reflect.IsMap $raw -}}
+  {{- with $raw.name }}{{ $name = . }}{{ end -}}
+  {{- with $raw.avatar }}{{ $avatar = . }}{{ end -}}
+  {{- with $raw.username }}{{ $username = . }}{{ end -}}
+{{- else if $raw -}}
+  {{- $name = $raw -}}
+{{- end -}}
+{{- return (dict "name" $name "avatar" $avatar "username" $username "url" site.Home.Permalink) -}}

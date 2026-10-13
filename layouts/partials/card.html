@@ -1,0 +1,52 @@
+{{/*
+  A post as a card: home "New", the Blog page, category pages, Go deeper.
+
+  The picture follows card-image.html (marked still, else first image, else
+  none). Pictures on cards are ink-toned and come to colour on hover/focus;
+  colour proper arrives inside the post. A card with no picture shows its
+  opening lines instead, so a short reflection reads in full right here.
+
+  Episodes never show a date: the site's pace is not a promise. Other posts do.
+
+  The whole card is clickable through the title link's ::after, so there is
+  still exactly one link per card for keyboard and screen-reader users.
+
+  Usage:  {{ partial "card.html" $page }}
+*/}}
+{{- $p := . -}}
+{{- $k := partialCached "post-kind.html" $p $p.RelPermalink -}}
+{{- $img := partial "card-image.html" $p -}}
+{{- $isEp := eq $k.kind "episode" -}}
+<article class="card card--{{ $k.kind }}{{ if not $img }} card--text{{ end }} h-entry">
+  {{- with $img }}
+  {{- $set := partial "photo-srcset.html" .src }}
+  <div class="card-img{{ if $isEp }} card-img--play{{ end }}">
+    <img src="{{ .src }}"{{ with $set }} srcset="{{ . }}" sizes="(max-width: 40rem) calc(100vw - 2rem), 24rem"{{ end }} alt="{{ .alt }}" loading="lazy" decoding="async">
+  </div>
+  {{- end }}
+
+  <p class="eyebrow card-eyebrow">
+    {{- if $isEp }}Episode · <span class="p-category">{{ $k.course.Title }}</span>
+    {{- else if eq $k.kind "deep-dive" }}Deep dive · <span class="p-category">{{ $k.course.Title }}</span>
+    {{- else if eq $k.kind "cue-card" }}Cue card
+    {{- else }}{{ range $i, $c := ($p.Params.categories | default slice) }}{{ if $i }} · {{ end }}<span class="p-category">{{ $c }}</span>{{ end }}{{ end -}}
+  </p>
+
+  {{- if $p.Title }}
+  <h3 class="card-title"><a class="card-link u-url p-name" href="{{ $p.RelPermalink }}">{{ $p.Title }}</a></h3>
+  {{- end }}
+
+  {{- if or (not $img) (not $p.Title) }}
+  <p class="card-excerpt {{ if $p.Title }}p-summary{{ else }}e-content{{ end }}">
+    {{- if $p.Title }}{{ $p.Summary | plainify | htmlUnescape | truncate 220 }}
+    {{- else }}<a class="card-link u-url" href="{{ $p.RelPermalink }}">{{ $p.Summary | plainify | htmlUnescape | truncate 280 }}</a>{{ end -}}
+  </p>
+  {{- end }}
+
+  <p class="card-meta">
+    {{- if $isEp }}Lesson {{ $k.episode.lesson.n }}
+    {{- else }}<time class="dt-published" datetime="{{ $p.Date.Format "2006-01-02T15:04:05Z07:00" }}">{{ $p.Date.Format "2 January 2006" }}</time>{{ if ge $p.ReadingTime 3 }} · {{ $p.ReadingTime }} min read{{ end }}
+    {{- end -}}
+  </p>
+  {{- if $isEp }}<time class="dt-published" datetime="{{ $p.Date.Format "2006-01-02T15:04:05Z07:00" }}" hidden></time>{{ end }}
+</article>

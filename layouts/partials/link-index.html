@@ -1,0 +1,22 @@
+{{/*
+  Who links to whom: a map from a page's site-relative path to the posts that
+  link to it. Built once per build by reading every post's links.
+
+  This is what lets a deep dive attach itself to its episode ("Go deeper")
+  just by linking to it, with nothing to edit on the episode.
+
+  Usage:  {{ $links := partialCached "link-index.html" "links" }}
+*/}}
+{{- $s := newScratch -}}
+{{- range partial "posts.html" . -}}
+  {{- $from := . -}}
+  {{- $seen := slice -}}
+  {{- range findRESubmatch `<a\s[^>]*href="([^"]+)"` (string .Content) -}}
+    {{- $to := partial "href-to-rel.html" (htmlUnescape (index . 1)) -}}
+    {{- if and $to (ne $to (partial "href-to-rel.html" $from.RelPermalink)) (not (in $seen $to)) -}}
+      {{- $s.Add $to (slice $from) -}}
+      {{- $seen = $seen | append $to -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- return $s.Values -}}

@@ -1,0 +1,13 @@
+{{/*
+  A title reduced to what a person means by it, so matching forgives the
+  things nobody should have to get exactly right: capitals, curly versus
+  straight apostrophes, colons, dashes, doubled spaces.
+
+    "Part the Wild Horse’s Mane"  ->  "part the wild horse s mane"
+    "part the wild horse's mane"  ->  "part the wild horse s mane"
+
+  Usage:  {{ $key := partial "norm-title.html" .Title }}
+*/}}
+{{- $t := lower (string .) -}}
+{{- $t = replaceRE `[^\p{L}\p{N}]+` " " $t -}}
+{{- return (strings.TrimSpace $t) -}}

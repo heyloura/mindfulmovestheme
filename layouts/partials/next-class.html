@@ -1,0 +1,11 @@
+{{/*
+  "Next class · Tuesday 9:00 am · Now & Women's Gym", worked out in the
+  reader's browser from the Classes page. Without scripts, or with no
+  classes listed, it's simply a link to the Classes page.
+
+  Usage:  {{ partial "next-class.html" (dict "class" "hero-next") }}
+*/}}
+{{- with partial "page-by-title.html" "Classes" -}}
+  {{- $classes := partialCached "classes-data.html" "classes" -}}
+<a class="next-class{{ with $.class }} {{ . }}{{ end }}" href="{{ .RelPermalink }}"{{ with $classes }} data-next-class="{{ . | jsonify }}"{{ end }}>Class times</a>
+{{- end -}}

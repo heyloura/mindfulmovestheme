@@ -1,0 +1,55 @@
+{{/*
+  Lockup, navigation, day/night toggle.
+
+  The navigation is Micro.blog's own: every page marked "include in
+  navigation" arrives in site.Menus.main. On a phone the list folds behind a
+  Menu button and opens full screen. Without JavaScript it simply stays open
+  as a list under the header, so nothing is ever unreachable.
+*/}}
+{{- $main := site.Params.wordmark | default site.Title -}}
+{{- $sub := site.Params.wordmark_sub -}}
+{{- $here := strings.TrimSuffix "/" .RelPermalink -}}
+<header class="site-head">
+  <div class="wrap head-inner">
+    <a class="lockup" href="{{ "/" | relURL }}"{{ if .IsHome }} aria-current="page"{{ end }}>
+      {{ partial "seal.html" (dict "size" 48 "class" "lockup-seal") }}
+      <span class="lockup-text">
+        <span class="lockup-main">{{ $main }}</span>
+        {{- with $sub }}<span class="lockup-sub">{{ . }}</span>{{ end }}
+      </span>
+    </a>
+
+    <div class="head-tools">
+      {{ partial "theme-toggle.html" . }}
+      {{- with site.Menus.main }}
+      <button class="menu-toggle" type="button" data-menu-toggle aria-controls="site-nav" aria-expanded="false">
+        <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path class="menu-bars" d="M3 7h18M3 12h18M3 17h18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <path class="menu-x" d="M5 5l14 14M19 5L5 19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+        <span class="menu-label">Menu</span>
+      </button>
+      {{- end }}
+    </div>
+
+    {{- with site.Menus.main }}
+    <nav class="site-nav" id="site-nav" aria-label="Main">
+      <ul>
+        {{- range . }}
+        {{- $url := .URL | relURL }}
+        <li><a href="{{ $url }}"{{ if eq (strings.TrimSuffix "/" $url) $here }} aria-current="page"{{ end }}>{{ .Name }}</a></li>
+        {{- end }}
+      </ul>
+      {{- /* only shown in the full-screen phone menu: the two things a student
+             on a phone most likely came for */}}
+      <div class="nav-extra">
+        {{- with partial "page-by-title.html" "Subscribe" }}
+        {{- $label := "Subscribe" }}{{ with findRESubmatch `(?is)<h[23][^>]*>(.*?)</h[23]>` (string .Content) 1 }}{{ $label = index (index . 0) 1 | plainify | htmlUnescape | strings.TrimSpace }}{{ end }}
+        <a class="btn btn--action" href="{{ .RelPermalink }}">{{ $label }}</a>
+        {{- end }}
+        {{ partial "next-class.html" (dict "class" "nav-next") }}
+      </div>
+    </nav>
+    {{- end }}
+  </div>
+</header>

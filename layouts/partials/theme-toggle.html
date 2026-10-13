@@ -1,0 +1,9 @@
+{{/* Every click flips day <-> night. Flipping to whatever the system already
+     prefers clears the override, so "auto" is where you land rather than a
+     click you have to spend. Same behaviour as Dragon Gate; see ui.js. */}}
+<button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme" aria-pressed="false">
+  <svg width="22" height="22" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+    <circle cx="10" cy="10" r="8.4" fill="none" stroke="currentColor" stroke-width="1.4"/>
+    <path d="M10 1.6a4.2 4.2 0 000 8.4 4.2 4.2 0 010 8.4A8.4 8.4 0 0010 1.6z" fill="currentColor"/>
+  </svg>
+</button>

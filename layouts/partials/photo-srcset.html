@@ -1,0 +1,25 @@
+{{/*
+  A srcset for one image URL, via Micro.blog's resizing CDN, or "" if the image
+  isn't one the CDN should touch.
+
+  Why: Micro.blog keeps uploads at full size — around 1800px and 2–5 MB each.
+  Shown in a 280px card, the browser has to shrink that 6× on the fly, and it
+  does so fast rather than carefully, which turns a phone camera's sensor noise
+  into visible grain (and a home page of jots into ~100 MB). With a srcset the
+  browser downloads a copy near display size, resized properly on the server.
+
+  Only JPEGs on cdn.uploads.micro.blog: the resizer converts to JPEG, so PNG
+  screenshots would lose crispness and GIFs would stop animating.
+
+  Usage:  {{ $set := partial "photo-srcset.html" $src }}
+*/}}
+{{- $src := . -}}
+{{- $out := "" -}}
+{{- if findRE `^https://cdn\.uploads\.micro\.blog/.+\.(?i:jpe?g)$` $src -}}
+  {{- $set := slice -}}
+  {{- range slice 400 600 900 1200 1800 -}}
+    {{- $set = $set | append (printf "https://cdn.micro.blog/photos/%dx/%s %dw" . $src .) -}}
+  {{- end -}}
+  {{- $out = delimit $set ", " -}}
+{{- end -}}
+{{- return $out -}}

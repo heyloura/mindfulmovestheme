@@ -1,0 +1,71 @@
+{{/*
+  Micro.blog's integration points, following microdotblog/theme-blank.
+
+  This is what makes the theme a good Micro.blog citizen: feed discovery,
+  rel=me verification, IndieAuth + Micropub + Webmention endpoints (so other
+  IndieWeb tools can sign in as you and reply to you), your Custom CSS setting,
+  and installed plugins. A theme without it silently breaks all of those.
+
+  Guarded so a local Hugo build — which has no site_id, no custom.css and no
+  plugins — still renders cleanly.
+*/}}
+{{- $a := partial "author.html" . -}}
+
+{{- /* Feeds: the main feed everywhere, plus this page's own (a category's). */ -}}
+{{- with site.Home.OutputFormats.Get "rss" }}
+<link rel="alternate" type="application/rss+xml" href="{{ .Permalink }}" title="{{ site.Title }}">
+{{- end }}
+{{- with site.Home.OutputFormats.Get "json" }}
+<link rel="alternate" type="application/json" href="{{ .Permalink }}" title="{{ site.Title }}">
+{{- end }}
+{{- if not .IsHome }}
+  {{- with .OutputFormats.Get "rss" }}
+<link rel="alternate" type="application/rss+xml" href="{{ .Permalink }}" title="{{ $.Title }} &middot; {{ site.Title }}">
+  {{- end }}
+{{- end }}
+
+{{- with $a.username }}
+<link rel="me" href="https://micro.blog/{{ . }}">
+{{- end }}
+{{- with site.Params.twitter_username }}
+<link rel="me" href="https://twitter.com/{{ . }}">
+{{- end }}
+{{- with site.Params.github_username }}
+<link rel="me" href="https://github.com/{{ . }}">
+{{- end }}
+{{- with site.Params.instagram_username }}
+<link rel="me" href="https://instagram.com/{{ . }}">
+{{- end }}
+{{- with site.Params.fediverse }}
+<link rel="me" href="{{ . }}">
+{{- end }}
+
+{{- /* The seal is the favicon (Micro.blog's default would be your avatar). */}}
+<link rel="icon" href="{{ "favicon.svg" | relURL }}" type="image/svg+xml">
+<link rel="authorization_endpoint" href="https://micro.blog/indieauth/auth">
+<link rel="token_endpoint" href="https://micro.blog/indieauth/token">
+<link rel="subscribe" href="https://micro.blog/users/follow">
+<link rel="webmention" href="https://micro.blog/webmention">
+<link rel="micropub" href="https://micro.blog/micropub">
+<link rel="microsub" href="https://micro.blog/microsub">
+
+{{- if site.Params.site_id }}
+<link rel="EditURI" type="application/rsd+xml" href="{{ "rsd.xml" | absURL }}">
+<link rel="stylesheet" href="{{ "custom.css" | relURL }}?{{ site.Params.theme_seconds }}">
+{{- end }}
+
+{{- with site.Params.bluesky_publication }}
+<link rel="site.standard.publication" href="{{ . | safeURL }}">
+{{- end }}
+{{- with .Params.bluesky }}
+  {{- if and site.Params.bluesky_publication .document }}
+<link rel="site.standard.document" href="{{ .document | safeURL }}">
+  {{- end }}
+{{- end }}
+
+{{- range site.Params.plugins_css }}
+<link rel="stylesheet" href="{{ . }}">
+{{- end }}
+{{- range $filename := site.Params.plugins_html }}
+  {{- partial $filename $ }}
+{{- end }}
