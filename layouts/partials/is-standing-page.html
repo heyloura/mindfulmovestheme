@@ -1,0 +1,13 @@
+{{/*
+  True for a standing page (About, Home, Classes, a course page…), false for
+  posts and replies.
+
+  Micro.blog gives standing pages a date like any post, so the date can't tell
+  them apart. Type can: Micro.blog's own themes have templates for "post" and
+  "reply", and everything else falls through to the default single template,
+  which is where its pages land. So a standing page is any regular page whose
+  type is neither of those.
+
+  Usage:  {{ if partial "is-standing-page.html" . }}…{{ end }}
+*/}}
+{{- return (and .IsPage (not (in (slice "post" "reply") .Type))) -}}
