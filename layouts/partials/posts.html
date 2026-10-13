@@ -6,10 +6,4 @@
      Same rule as Dragon Gate.
 
      Usage:  {{ $posts := partial "posts.html" . }}  */}}
-{{- $out := slice -}}
-{{- range site.RegularPages -}}
-  {{- if not .Date.IsZero -}}
-    {{- $out = $out | append . -}}
-  {{- end -}}
-{{- end -}}
-{{- return (sort $out "Date" "desc") -}}
+{{- return (sort (where site.RegularPages "Type" "post") "Date" "desc") -}}
