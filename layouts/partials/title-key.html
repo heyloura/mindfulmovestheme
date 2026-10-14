@@ -1,0 +1,9 @@
+{{/*
+  What a move's name is matched by: its main name (any trailing traditional
+  name in parentheses dropped, see split-name.html), normalised the forgiving
+  way (norm-title.html). So the outline line "Single whip (Dan Bian)", an
+  episode titled "Single whip" and a cue card titled "Single Whip" all agree.
+
+  Usage:  {{ $key := partial "title-key.html" .Title }}
+*/}}
+{{- return (partial "norm-title.html" (partial "split-name.html" .).main) -}}
