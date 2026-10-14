@@ -208,6 +208,8 @@ h3 { font-size: 1.9rem; line-height: 1.05; }
 }
 .menu-toggle { display: none; }
 .menu-x { display: none; }
+.theme-toggle--menu { padding: 0; font-weight: 400; color: var(--wash); }
+.theme-toggle-text { font-size: 1rem; }
 
 .site-nav { order: 2; margin-left: auto; }
 .site-nav ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.25rem 1.6rem; }
@@ -222,6 +224,15 @@ h3 { font-size: 1.9rem; line-height: 1.05; }
 /* Phones: the list folds behind Menu and opens full screen. Only when JS is
    running (html.js), so without it the list just sits under the header. */
 @media (max-width: 47.99rem) {
+  /* the lockup may shrink, so a long title wraps beside the seal and the
+     Menu button keeps its place on the same row */
+  .head-inner { flex-wrap: wrap; column-gap: 0.75rem; }
+  .lockup { flex: 1 1 0; min-width: 0; gap: 0.6rem; }
+  .lockup-seal { width: 40px; height: 40px; }
+  .lockup-main { font-size: 1.4rem; line-height: 1.05; }
+  .head-tools { flex-shrink: 0; }
+  .js .theme-toggle--head { display: none; }   /* it's in the menu instead */
+
   .site-nav { order: 4; flex-basis: 100%; margin-left: 0; }
   .site-nav ul { flex-direction: column; gap: 0; }
   .site-nav li > a { min-height: 3.5rem; font: 600 1.875rem/1 var(--display); }
@@ -649,8 +660,6 @@ h3 { font-size: 1.9rem; line-height: 1.05; }
 }
 .foot-card { display: flex; align-items: center; gap: 0.75rem; }
 .foot-name { font: 600 1.4rem/1.1 var(--display); text-decoration: none; }
-.foot-profiles { margin: 0.25rem 0 0; display: flex; gap: 1rem; font-size: 0.875rem; color: var(--wash); }
-.foot-profiles:empty { display: none; }
 .foot-nav { display: flex; flex-wrap: wrap; gap: 0.25rem 1.5rem; font-size: 0.9375rem; color: var(--wash); }
 .foot-nav a { display: inline-flex; align-items: center; min-height: var(--tap); text-decoration: none; }
 .foot-nav a:hover { text-decoration: underline; }
