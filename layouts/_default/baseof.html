@@ -2,6 +2,9 @@
 <html lang="{{ site.LanguageCode | default "en" }}">
 <head>
   {{ partial "head.html" . }}
+  {{- /* a layout can name itself: /archive/ and /photos/ are the home page in
+         another output format, so .IsHome alone would call them the site's name */}}
+  <title>{{ block "title" . }}{{ if .IsHome }}{{ site.Title }}{{ else }}{{ .Title }} &middot; {{ site.Title }}{{ end }}{{ end }}</title>
 </head>
 <body class="{{ if .IsHome }}is-home{{ end }}">
   <a class="skip-link" href="#main">Skip to content</a>
