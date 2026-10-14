@@ -1,0 +1,18 @@
+{{/* The posts shown in listings (home "New", the Blog page): every post
+     except cue cards, newest first.
+
+     Cue cards arrive most weeks at class pace and would crowd the writing out
+     of both. They have their own home instead: the Cue Cards category page
+     (the deck, linked from the Blog page's filters) and each episode's "Print
+     the cue card". They still go out in the newsletter, the feed and the
+     archive, since Micro.blog sends every post and students want them.
+
+     Anything that needs ALL posts (course outlines, cue card pairing, Go
+     deeper) uses posts.html instead.
+
+     Usage:  {{ $posts := partial "listed-posts.html" . }}  */}}
+{{- $out := slice -}}
+{{- range partial "posts.html" . -}}
+  {{- if ne (partialCached "post-kind.html" . .RelPermalink).kind "cue-card" }}{{ $out = $out | append . }}{{ end -}}
+{{- end -}}
+{{- return $out -}}
