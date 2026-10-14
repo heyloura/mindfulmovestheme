@@ -1,0 +1,49 @@
+{{/*
+  /archive/: every post, cue cards included (this is the full record),
+  grouped by year, newest first.
+
+  On Micro.blog this is the home page rendered in its "ArchiveHTML" output,
+  so .Title here is the site's name; the heading just says Archive. Episodes
+  keep their place in time but show no date, as everywhere else on the site.
+*/}}
+{{- $posts := partial "posts.html" . -}}
+{{- $years := slice -}}
+{{- range $posts }}{{ $y := .Date.Format "2006" }}{{ if not (in $years $y) }}{{ $years = $years | append $y }}{{ end }}{{ end -}}
+<section class="section">
+  <div class="wrap h-feed">
+    <header class="list-head">
+      <div class="section-title"><h1 class="p-name">Archive</h1>{{ partial "brush-rule.html" (dict) }}</div>
+      <p class="quiet">{{ len $posts }} post{{ if ne (len $posts) 1 }}s{{ end }}</p>
+    </header>
+
+    {{- range $years }}
+    {{- $y := . }}
+    <section class="archive-year" aria-labelledby="year-{{ $y }}">
+      <h2 class="archive-year-head" id="year-{{ $y }}">{{ $y }}</h2>
+      <ol class="archive-list">
+        {{- range $posts }}{{ if eq (.Date.Format "2006") $y }}
+        {{- $k := partialCached "post-kind.html" . .RelPermalink }}
+        <li class="h-entry">
+          {{- if eq $k.kind "episode" }}
+          <span class="archive-date" aria-hidden="true"></span><time class="dt-published" datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}" hidden></time>
+          {{- else }}
+          <time class="archive-date dt-published" datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">{{ .Date.Format "Jan 2" }}</time>
+          {{- end }}
+          <span class="archive-what">
+            <a class="u-url" href="{{ .RelPermalink }}">
+              {{- with .Title }}<span class="p-name">{{ . }}</span>{{ else }}<span class="p-summary">{{ .Summary | plainify | htmlUnescape | truncate 90 }}</span>{{ end -}}
+            </a>
+            <span class="archive-kind">
+              {{- if eq $k.kind "episode" }}Episode · {{ $k.course.Title }} · Lesson {{ $k.episode.lesson.n }}
+              {{- else if eq $k.kind "deep-dive" }}Deep dive · {{ $k.course.Title }}
+              {{- else if eq $k.kind "cue-card" }}Cue card
+              {{- else }}{{ delimit (.Params.categories | default slice) " · " }}{{ end -}}
+            </span>
+          </span>
+        </li>
+        {{- end }}{{ end }}
+      </ol>
+    </section>
+    {{- end }}
+  </div>
+</section>
