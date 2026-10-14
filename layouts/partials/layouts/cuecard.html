@@ -28,15 +28,15 @@
 
 {{- /* the episode this card goes with: same title; if the card also names a
        course, that course's episode wins (moves repeat across forms) */ -}}
-{{- $key := partial "norm-title.html" .Title -}}
+{{- $key := partial "title-key.html" .Title -}}
 {{- $mine := slice }}{{ range .Params.categories }}{{ $mine = $mine | append (partial "norm-title.html" .) }}{{ end -}}
 {{- $episode := false -}}
 {{- $preferred := false -}}
 {{- range partial "posts.html" . -}}
-  {{- if eq (partial "norm-title.html" .Title) $key -}}
+  {{- if eq (partial "title-key.html" .Title) $key -}}
     {{- $k := partialCached "post-kind.html" . .RelPermalink -}}
     {{- if eq $k.kind "episode" -}}
-      {{- $hit := dict "page" . "course" $k.course "n" $k.episode.lesson.n -}}
+      {{- $hit := dict "page" . "course" $k.course "n" $k.episode.lesson.n "alt" $k.episode.lesson.alt -}}
       {{- if not $episode }}{{ $episode = $hit }}{{ end -}}
       {{- if and (not $preferred) (in $mine (partial "norm-title.html" $k.course.Title)) }}{{ $preferred = $hit }}{{ end -}}
     {{- end -}}
@@ -63,6 +63,7 @@
       <div class="cuecard-text">
         <p class="eyebrow">{{ with $episode }}{{ .course.Title }} · Move {{ .n }}{{ else }}Cue card{{ end }}</p>
         <h1 class="cuecard-title p-name">{{ .Title }}</h1>
+        {{- with $episode }}{{ with .alt }}<p class="cuecard-alt">{{ . }}</p>{{ end }}{{ end }}
         {{- with $quote }}<blockquote class="cuecard-quote">{{ . | safeHTML }}</blockquote>{{ end }}
         {{ partial "brush-rule.html" (dict "class" "cuecard-rule") }}
         <p class="cuecard-label">This week at home</p>
