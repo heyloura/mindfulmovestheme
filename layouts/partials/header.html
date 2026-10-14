@@ -5,6 +5,10 @@
   navigation" arrives in site.Menus.main. On a phone the list folds behind a
   Menu button and opens full screen. Without JavaScript it simply stays open
   as a list under the header, so nothing is ever unreachable.
+
+  On a phone the title wraps beside the seal and the Menu button keeps the
+  same row; the day/night toggle moves into the menu, where there's room to
+  label it.
 */}}
 {{- $main := site.Params.wordmark | default site.Title -}}
 {{- $sub := site.Params.wordmark_sub -}}
@@ -20,7 +24,7 @@
     </a>
 
     <div class="head-tools">
-      {{ partial "theme-toggle.html" . }}
+      {{ partial "theme-toggle.html" (dict "class" "theme-toggle--head") }}
       {{- with site.Menus.main }}
       <button class="menu-toggle" type="button" data-menu-toggle aria-controls="site-nav" aria-expanded="false">
         <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -41,13 +45,15 @@
         {{- end }}
       </ul>
       {{- /* only shown in the full-screen phone menu: the two things a student
-             on a phone most likely came for */}}
+             on a phone most likely came for, and the day/night switch the
+             narrow header has no room for */}}
       <div class="nav-extra">
         {{- with partial "page-by-title.html" "Subscribe" }}
         {{- $label := "Subscribe" }}{{ with findRESubmatch `(?is)<h[23][^>]*>(.*?)</h[23]>` (string .Content) 1 }}{{ $label = index (index . 0) 1 | plainify | htmlUnescape | strings.TrimSpace }}{{ end }}
         <a class="btn btn--action" href="{{ .RelPermalink }}">{{ $label }}</a>
         {{- end }}
         {{ partial "next-class.html" (dict "class" "nav-next") }}
+        {{ partial "theme-toggle.html" (dict "labelled" true "class" "theme-toggle--menu") }}
       </div>
     </nav>
     {{- end }}
