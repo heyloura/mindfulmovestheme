@@ -1,91 +1,29 @@
 {{/*
-  A cue card: shown as a card on screen, printed as a 4×6 inch card.
+  The cue card that goes with an episode, or false.
 
-  Read from the post (see the content guide):
-    the first image                    the posture drawing
-    the first quote (>)                the line from class
-    "This week at home" and below      the drill
-    a last line starting "Credit:"     the image credit, small, printed too
+  A cue card pairs with an episode by title. Moves repeat across forms (Cloud
+  Hands is in Yang 8 and Yang 24), so a cue card that ALSO carries a course
+  category pairs only with that course's episode; one in Cue Cards alone pairs
+  with the same-titled episode in any course. The newest match wins.
 
-  If the post doesn't follow that shape, the card still works: whatever is
-  left is shown as the card's text. It links back to its episode when one
-  has the same title (the reverse of cue-card-for.html).
+  Input: dict "page" (the episode) "course" (its course page)
+  Usage: {{ with partial "cue-card-for.html" (dict "page" . "course" $course) }}…{{ end }}
 */}}
-{{- $html := string .Content -}}
-{{- $img := partial "card-image.html" . -}}
-{{- /* the quote keeps your own formatting: bold, and a line break before an
-       attribution ("…wet tofu.** / Y.C. Chaing") stays a line break */ -}}
-{{- $quote := "" }}{{ with findRESubmatch `(?s)<blockquote[^>]*>(.*?)</blockquote>` $html 1 }}{{ $quote = index (index . 0) 1 | strings.TrimSpace }}{{ end -}}
-{{- $credit := "" }}{{ with findRESubmatch `(?is)<p>\s*credit:\s*(.*?)</p>` $html 1 }}{{ $credit = index (index . 0) 1 }}{{ end -}}
-{{- $drill := "" -}}
-{{- with findRESubmatch `(?is)<h[23][^>]*>\s*this week at home\s*</h[23]>(.*)$` $html 1 }}{{ $drill = index (index . 0) 1 }}{{ end -}}
-{{- if not $drill -}}
-  {{- /* not the usual shape: the card's text is everything but picture, quote and credit */ -}}
-  {{- $drill = replaceRE `(?s)<blockquote[^>]*>.*?</blockquote>` "" $html 1 -}}
-  {{- $drill = replaceRE `(?s)<p>\s*<img\s[^>]*>\s*</p>|<img\s[^>]*>` "" $drill 1 -}}
-{{- end -}}
-{{- $drill = replaceRE `(?is)<p>\s*credit:.*?</p>` "" $drill -}}
-
-{{- /* the episode this card goes with: same title; if the card also names a
-       course, that course's episode wins (moves repeat across forms) */ -}}
-{{- $key := partial "norm-title.html" .Title -}}
-{{- $mine := slice }}{{ range .Params.categories }}{{ $mine = $mine | append (partial "norm-title.html" .) }}{{ end -}}
-{{- $episode := false -}}
-{{- $preferred := false -}}
+{{- $key := partial "title-key.html" .page.Title -}}
+{{- $courseKey := partial "norm-title.html" .course.Title -}}
+{{- $any := false -}}
+{{- $mine := false -}}
 {{- range partial "posts.html" . -}}
-  {{- if eq (partial "norm-title.html" .Title) $key -}}
-    {{- $k := partialCached "post-kind.html" . .RelPermalink -}}
-    {{- if eq $k.kind "episode" -}}
-      {{- $hit := dict "page" . "course" $k.course "n" $k.episode.lesson.n -}}
-      {{- if not $episode }}{{ $episode = $hit }}{{ end -}}
-      {{- if and (not $preferred) (in $mine (partial "norm-title.html" $k.course.Title)) }}{{ $preferred = $hit }}{{ end -}}
+  {{- if eq (partial "title-key.html" .Title) $key -}}
+    {{- $cats := slice -}}
+    {{- range .Params.categories }}{{ $cats = $cats | append (partial "norm-title.html" .) }}{{ end -}}
+    {{- if in $cats "cue cards" -}}
+      {{- if in $cats $courseKey -}}
+        {{- if not $mine }}{{ $mine = . }}{{ end -}}
+      {{- else if eq (len $cats) 1 -}}
+        {{- if not $any }}{{ $any = . }}{{ end -}}
+      {{- end -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}
-{{- with $preferred }}{{ $episode = . }}{{ end -}}
-
-<article class="cuecard-page h-entry">
-  <div class="wrap">
-    <header class="cuecard-head">
-      {{- /* the card itself already says "Cue card"; above it, only the way back
-             to its course, when it has one */}}
-      {{- with $episode }}<p class="eyebrow">Cue card · <a href="{{ .course.RelPermalink }}">{{ .course.Title }}</a></p>{{ end }}
-      <a class="u-url u-uid" href="{{ .Permalink }}" hidden><time class="dt-published" datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}"></time></a>
-    </header>
-
-    <div class="cuecard">
-      <div class="cuecard-pic">
-        {{- /* the picture space is a tall 2:3; the frame hugs whatever shape the
-               photo is, so a square one sits centred instead of in an empty box */}}
-        {{- with $img }}<div class="cuecard-frame"><img src="{{ .src }}" alt="{{ .alt }}"></div>{{ end }}
-        {{- with $credit }}<p class="cuecard-credit">{{ . | safeHTML }}</p>{{ end }}
-      </div>
-      <div class="cuecard-text">
-        <p class="eyebrow">{{ with $episode }}{{ .course.Title }} · Move {{ .n }}{{ else }}Cue card{{ end }}</p>
-        <h1 class="cuecard-title p-name">{{ .Title }}</h1>
-        {{- with $quote }}<blockquote class="cuecard-quote">{{ . | safeHTML }}</blockquote>{{ end }}
-        {{ partial "brush-rule.html" (dict "class" "cuecard-rule") }}
-        <p class="cuecard-label">This week at home</p>
-        <div class="cuecard-drill e-content">{{ $drill | safeHTML }}</div>
-        <div class="cuecard-foot">
-          <span class="cuecard-mark">
-            {{- partial "seal.html" (dict "size" 30 "flat" true) -}}
-            <span class="cuecard-mark-text">
-              <span class="cuecard-mark-main">{{ site.Params.wordmark | default site.Title }}</span>
-              {{- with site.Params.wordmark_sub }}<span class="cuecard-mark-sub">{{ . }}</span>{{ end -}}
-            </span>
-          </span>
-          {{- with partial "page-by-title.html" "Start Here" }}<span class="cuecard-url">{{ replaceRE `^https?://(www\.)?` "" (strings.TrimSuffix "/" .Permalink) }}</span>{{ end }}
-        </div>
-      </div>
-    </div>
-
-    <p class="cuecard-actions">
-      <button class="btn" type="button" data-print data-tinylytics-event="cuecard.print" data-tinylytics-event-value="{{ .Title }}">
-        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 9V3h10v6M7 17H4v-7h16v7h-3M7 14h10v7H7z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
-        Print this card
-      </button>
-      {{- with $episode }}<a href="{{ .page.RelPermalink }}">Back to the lesson: {{ .page.Title }}</a>{{ end }}
-    </p>
-  </div>
-</article>
+{{- return (or $mine $any) -}}
