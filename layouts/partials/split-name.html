@@ -1,0 +1,22 @@
+{{/*
+  A move's name and, if it has one, its traditional name, written as a
+  trailing parenthesis:
+
+    "Energy ball right to ward off left (Grasp the Sparrow's Tail: Ward Off Left)"
+      -> main "Energy ball right to ward off left"
+         alt  "Grasp the Sparrow's Tail: Ward Off Left"
+    "Single whip"
+      -> main "Single whip", alt ""
+
+  Only a parenthesis at the very end counts, so a name with brackets in the
+  middle is left alone.
+
+  Usage:  {{ $n := partial "split-name.html" "Single whip (Dan Bian)" }}  {{ $n.main }}
+*/}}
+{{- $s := strings.TrimSpace (string .) -}}
+{{- $out := dict "main" $s "alt" "" -}}
+{{- with findRESubmatch `^(.+?)\s*\(([^()]+)\)\s*$` $s 1 -}}
+  {{- $m := index . 0 -}}
+  {{- $out = dict "main" (strings.TrimSpace (index $m 1)) "alt" (strings.TrimSpace (index $m 2)) -}}
+{{- end -}}
+{{- return $out -}}
