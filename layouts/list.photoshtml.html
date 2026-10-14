@@ -1,0 +1,4 @@
+{{- /* /photos/ (the home page's PhotosHTML output on Micro.blog). Same file
+       name as the blank theme's, so ours replaces it. */ -}}
+{{ define "title" }}Photos &middot; {{ site.Title }}{{ end }}
+{{ define "main" }}{{ partial "photos-main.html" . }}{{ end }}
