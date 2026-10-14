@@ -13,7 +13,9 @@
 */}}
 {{- $html := string .Content -}}
 {{- $img := partial "card-image.html" . -}}
-{{- $quote := "" }}{{ with findRESubmatch `(?s)<blockquote[^>]*>(.*?)</blockquote>` $html 1 }}{{ $quote = index (index . 0) 1 | plainify | htmlUnescape | strings.TrimSpace }}{{ end -}}
+{{- /* the quote keeps your own formatting: bold, and a line break before an
+       attribution ("…wet tofu.** / Y.C. Chaing") stays a line break */ -}}
+{{- $quote := "" }}{{ with findRESubmatch `(?s)<blockquote[^>]*>(.*?)</blockquote>` $html 1 }}{{ $quote = index (index . 0) 1 | strings.TrimSpace }}{{ end -}}
 {{- $credit := "" }}{{ with findRESubmatch `(?is)<p>\s*credit:\s*(.*?)</p>` $html 1 }}{{ $credit = index (index . 0) 1 }}{{ end -}}
 {{- $drill := "" -}}
 {{- with findRESubmatch `(?is)<h[23][^>]*>\s*this week at home\s*</h[23]>(.*)$` $html 1 }}{{ $drill = index (index . 0) 1 }}{{ end -}}
@@ -57,7 +59,7 @@
       <div class="cuecard-text">
         <p class="eyebrow">{{ with $episode }}{{ .course.Title }} · Move {{ .n }}{{ else }}Cue card{{ end }}</p>
         <h1 class="cuecard-title p-name">{{ .Title }}</h1>
-        {{- with $quote }}<p class="cuecard-quote">“{{ . }}”</p>{{ end }}
+        {{- with $quote }}<blockquote class="cuecard-quote">{{ . | safeHTML }}</blockquote>{{ end }}
         {{ partial "brush-rule.html" (dict "class" "cuecard-rule") }}
         <p class="cuecard-label">This week at home</p>
         <div class="cuecard-drill e-content">{{ $drill | safeHTML }}</div>
