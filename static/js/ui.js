@@ -6,10 +6,14 @@
    * matches the system setting, the stored override is cleared instead of
    * saved, so flipping back to match your device quietly returns you to auto.
    * The clock never picks the theme: the reader's own setting does.
+   *
+   * There are two copies of the button (header, and inside the phone menu);
+   * both are kept in step. Each is named for what it will do ("Switch to
+   * night"), and the menu copy shows those words too.
    */
   var KEY = 'mm-theme';
-  var btn = document.querySelector('[data-theme-toggle]');
-  if (btn) {
+  var toggles = Array.prototype.slice.call(document.querySelectorAll('[data-theme-toggle]'));
+  if (toggles.length) {
     var mq = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
 
     var system = function () { return mq && mq.matches ? 'dark' : 'light'; };
@@ -22,9 +26,12 @@
     var effective = function () { return stored() || system(); };
 
     var sync = function () {
-      var now = effective();
-      btn.setAttribute('aria-label', now === 'dark' ? 'Switch to day' : 'Switch to night');
-      btn.setAttribute('aria-pressed', String(now === 'dark'));
+      var label = effective() === 'dark' ? 'Switch to day' : 'Switch to night';
+      toggles.forEach(function (b) {
+        b.setAttribute('aria-label', label);
+        var text = b.querySelector('[data-theme-label]');
+        if (text) text.textContent = label;
+      });
     };
 
     var set = function (mode) {
@@ -39,8 +46,10 @@
     };
 
     sync();
-    btn.addEventListener('click', function () {
-      set(effective() === 'dark' ? 'light' : 'dark');
+    toggles.forEach(function (b) {
+      b.addEventListener('click', function () {
+        set(effective() === 'dark' ? 'light' : 'dark');
+      });
     });
     if (mq && mq.addEventListener) mq.addEventListener('change', sync);
   }
