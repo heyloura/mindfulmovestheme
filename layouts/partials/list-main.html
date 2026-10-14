@@ -1,0 +1,24 @@
+{{/* Category (and any other) lists, as cards. A category page picks up an
+     intro from a standing page with the same title, as in Dragon Gate; when
+     that page is a course, the intro is its course and a link goes there.
+
+     Called from _default/list.html and section/replies.html (the default
+     theme has its own replies page, which would otherwise take over). */}}
+{{- $intro := .Content -}}
+{{- $course := false -}}
+{{- with partial "page-by-title.html" .Title -}}
+  {{- if partialCached "course-lessons.html" . .RelPermalink }}{{ $course = . }}{{ else if not $intro }}{{ $intro = .Content }}{{ end -}}
+{{- end -}}
+<section class="section">
+  <div class="wrap h-feed">
+    <header class="list-head">
+      {{- if eq .Kind "term" }}<p class="eyebrow">Category · {{ len .Pages }} post{{ if ne (len .Pages) 1 }}s{{ end }}</p>{{ end }}
+      <div class="section-title"><h1 class="p-name">{{ .Title }}</h1>{{ partial "brush-rule.html" (dict) }}</div>
+      {{- with $intro }}<div class="prose">{{ . }}</div>{{ end }}
+      {{- with $course }}<p><a class="btn" href="{{ .RelPermalink }}">See the {{ .Title }} course</a></p>{{ end }}
+    </header>
+    <div class="cards">
+      {{- range .Pages.ByDate.Reverse }}{{ partial "card.html" . }}{{ end }}
+    </div>
+  </div>
+</section>
