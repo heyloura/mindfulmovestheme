@@ -1,0 +1,33 @@
+{{/*
+  Every post, reply and standing page comes through here and is sent to the
+  layout that fits what it is (post-kind.html), or, for a few standing pages,
+  what it's called:
+
+    an episode                        → layouts/episode.html
+    a cue card                        → layouts/cuecard.html
+    the page titled "Blog"            → layouts/blog.html
+    the page titled "Courses"         → layouts/courses.html
+    a page with a course outline      → layouts/course.html
+    everything else                   → layouts/entry.html
+
+  Called from _default/single.html, post/single.html and reply/single.html.
+  Those last two must exist: a custom theme on Micro.blog sits on top of the
+  default theme, which has its own post/ and reply/ templates, and Hugo
+  prefers a template made for the content's type over _default/single.html.
+  Without ours, every post would quietly render in the default theme's markup.
+*/}}
+{{- $k := partialCached "post-kind.html" . .RelPermalink -}}
+{{- $title := partial "norm-title.html" .Title -}}
+{{- if eq $k.kind "episode" -}}
+  {{ partial "layouts/episode.html" . }}
+{{- else if eq $k.kind "cue-card" -}}
+  {{ partial "layouts/cuecard.html" . }}
+{{- else if and (eq $k.kind "page") (eq $title "blog") -}}
+  {{ partial "layouts/blog.html" . }}
+{{- else if and (eq $k.kind "page") (eq $title "courses") -}}
+  {{ partial "layouts/courses.html" . }}
+{{- else if and (eq $k.kind "page") (partialCached "course-lessons.html" . .RelPermalink) -}}
+  {{ partial "layouts/course.html" . }}
+{{- else -}}
+  {{ partial "layouts/entry.html" . }}
+{{- end -}}
