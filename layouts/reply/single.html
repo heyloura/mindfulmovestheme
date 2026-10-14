@@ -1,0 +1,3 @@
+{{- /* Replies. Must exist so Micro.blog's default theme's reply/single.html
+       never takes over; see partials/single-main.html. */ -}}
+{{ define "main" }}{{ partial "single-main.html" . }}{{ end }}
