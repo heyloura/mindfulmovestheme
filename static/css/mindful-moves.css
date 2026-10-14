@@ -624,13 +624,20 @@ h3 { font-size: 1.9rem; line-height: 1.05; }
   background: var(--ground); border: 1px solid var(--faint-line);
 }
 .cuecard-pic { display: flex; flex-direction: column; gap: 0.5rem; min-height: 0; }
-.cuecard-pic img { flex: 1; width: 100%; min-height: 0; object-fit: contain; border: 1px solid var(--faint); }
+/* the picture space is a tall 2:3. The frame takes the space; the photo sits
+   centred in it at its own shape, with the border on the photo, so a 2:3
+   photo fills it and a square one reads as a square rather than an empty box */
+.cuecard-frame { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; }
+.cuecard-frame img { display: block; width: auto; height: auto; max-width: 100%; max-height: 100%; border: 1px solid var(--faint); }
 .cuecard-credit { margin: 0; font-size: 0.6875rem; line-height: 1.35; color: var(--wash); }
 .cuecard-credit a { color: inherit; }
 .cuecard-text { display: flex; flex-direction: column; gap: 0.75rem; min-width: 0; }
 .cuecard-text > p { margin: 0; }
 .cuecard-title { font-size: clamp(2.4rem, 5vw, 3.75rem); line-height: 0.95; }
-.cuecard-quote { margin: 0; font: italic 400 1.25rem/1.45 var(--reading); }
+.cuecard-quote {
+  margin: 0; font: italic 400 1.25rem/1.45 var(--reading);
+  font-synthesis-style: none;   /* Chinese has no italic: keep it upright, not faux-slanted */
+}
 .cuecard-quote p { margin: 0; white-space: pre-line; }   /* keeps the line break before an attribution */
 .cuecard-quote p + p { margin-top: 0.4em; }
 .cuecard-quote strong { font-weight: 600; }
@@ -644,12 +651,16 @@ h3 { font-size: 1.9rem; line-height: 1.05; }
   margin-top: auto; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
   gap: 0.5rem 1rem; font-size: 0.875rem; color: var(--wash);
 }
-.cuecard-mark { display: inline-flex; align-items: center; gap: 0.5rem; font: 600 1.15rem/1 var(--display); color: var(--ink); }
+.cuecard-mark { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--ink); }
+.cuecard-mark .seal { flex-shrink: 0; }
+.cuecard-mark-text { display: flex; flex-direction: column; gap: 0.1rem; }
+.cuecard-mark-main { font: 600 1.15rem/1 var(--display); }
+.cuecard-mark-sub { font-size: 0.5625rem; letter-spacing: 0.32em; text-transform: uppercase; color: var(--wash); }
 .cuecard-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.5rem; margin: 1.75rem 0 0; }
 
 @media (max-width: 40rem) {
   .cuecard { grid-template-columns: 1fr; aspect-ratio: auto; padding: 1.25rem; gap: 1.25rem; }
-  .cuecard-pic img { max-height: 18rem; }
+  .cuecard-frame img { max-height: 18rem; }
 }
 
 @page cuecard { size: 6in 4in; margin: 0; }
@@ -814,5 +825,6 @@ h3 { font-size: 1.9rem; line-height: 1.05; }
   .cuecard-drill { font-size: 10.5pt; }
   .cuecard-credit { font-size: 6pt; }
   .cuecard-foot { font-size: 7.5pt; }
-  .cuecard-mark { font-size: 11pt; }
+  .cuecard-mark-main { font-size: 11pt; }
+  .cuecard-mark-sub { font-size: 5.5pt; }
 }
