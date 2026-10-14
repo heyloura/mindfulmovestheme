@@ -46,6 +46,8 @@
     <header class="episode-head">
       <p class="eyebrow"><a class="p-category" href="{{ $course.RelPermalink }}">{{ $course.Title }}</a> · Lesson {{ $ep.lesson.n }}</p>
       <h1 class="p-name">{{ .Title }}</h1>
+      {{- /* the traditional name, from the course outline's parenthesis */}}
+      {{- with $ep.lesson.alt }}<p class="episode-alt">{{ . }}</p>{{ end }}
       <a class="u-url u-uid" href="{{ .Permalink }}" hidden><time class="dt-published" datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}"></time></a>
     </header>
 
