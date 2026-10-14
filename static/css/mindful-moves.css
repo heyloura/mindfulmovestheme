@@ -295,8 +295,9 @@ h3 { font-size: 1.9rem; line-height: 1.05; }
 .card:focus-within, .course-card:focus-within { outline: 2px solid var(--ink); outline-offset: 6px; border-radius: 2px; }
 .card-link:focus-visible { outline: none; }
 
+/* every card picture is 3:2 landscape, course cards included, so one shape
+   works everywhere (cue cards are the exception: their own 2:3 portrait) */
 .card-img { position: relative; aspect-ratio: 3 / 2; overflow: hidden; background: var(--shade); margin-bottom: 0.45rem; }
-.course-card .card-img { aspect-ratio: 4 / 3; }
 .card-img img {
   display: block; width: 100%; height: 100%; object-fit: cover;
   filter: var(--tone);
