@@ -1,9 +1,10 @@
 {{/*
   The Blog page: your intro, the categories as quiet filters, then every post
-  newest first. The newest 24 are cards; anything older is a plain list of
-  titles, so the page stays light however long the blog gets.
+  newest first, except cue cards (see listed-posts.html; the "Cue Cards"
+  filter leads to the deck). The newest 24 are cards; anything older is a
+  plain list of titles, so the page stays light however long the blog gets.
 */}}
-{{- $posts := partial "posts.html" . -}}
+{{- $posts := partial "listed-posts.html" . -}}
 {{- $cardCount := 24 -}}
 <section class="section">
   <div class="wrap h-feed">
