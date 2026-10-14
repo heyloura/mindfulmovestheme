@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ .Title }} &middot; {{ site.Title }}{{ end }}</title>
+{{- /* <title> is in baseof.html, as a block a layout can replace */}}
 {{ with site.Params.description }}<meta name="description" content="{{ . }}">{{ end }}
 {{- /* Home and Notice are pages only so they can be edited in Micro.blog; their
        words show up elsewhere. Keep search engines from listing them alone. */}}
