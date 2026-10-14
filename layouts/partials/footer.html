@@ -6,6 +6,10 @@
   links appear the moment those pages exist and vanish if they don't.
   On a category page the category's own feed is offered beside the main one,
   so someone who only wants Yang 8 can follow just Yang 8.
+
+  No visible profile links (Dragon Gate shows a "Micro.blog" link here): this
+  site's Micro.blog account is a personal one, and the rel="me" verification
+  Micro.blog needs is already in the <head> (microblog_head.html).
 */}}
 {{- $a := partial "author.html" . -}}
 {{- $links := slice -}}
@@ -21,10 +25,6 @@
       <div class="foot-who">
         <a class="foot-name p-name u-url u-uid" href="{{ $a.url }}">{{ site.Title }}</a>
         {{- with $a.avatar }}<img class="u-photo" src="{{ . }}" alt="" hidden>{{ end }}
-        <p class="foot-profiles">
-          {{- with $a.username }}<a class="u-url" rel="me" href="https://micro.blog/{{ . }}">Micro.blog</a>{{ end }}
-          {{- with site.Params.fediverse }}<a class="u-url" rel="me" href="{{ . }}">Fediverse</a>{{ end }}
-        </p>
       </div>
     </div>
 
