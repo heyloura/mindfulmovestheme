@@ -23,18 +23,24 @@
     <img class="course-hero-img" src="{{ .src }}"{{ with $set }} srcset="{{ . }}" sizes="100vw"{{ end }} alt="{{ .alt }}">
     {{- end }}
     <div class="wrap course-hero-inner">
-      <p class="eyebrow">Course{{ with $family }} · {{ . }}{{ end }} · {{ $released }} video{{ if ne $released 1 }}s{{ end }}</p>
+      <p class="eyebrow">Course{{ with $family }} · {{ . }}{{ end }} · {{ if $released }}{{ $released }} video{{ if ne $released 1 }}s{{ end }}{{ else }}Coming soon{{ end }}</p>
       <h1>{{ .Title }}</h1>
     </div>
   </header>
 
-  <div class="wrap course-body">
+  {{- /* with no intro written and nothing filmed yet there's nothing to sit
+         beside the outline, so the outline takes the page instead of leaving
+         an empty column */ -}}
+  {{- $hasIntro := or (strings.TrimSpace $intro) $first }}
+  <div class="wrap course-body{{ if not $hasIntro }} course-body--outline-only{{ end }}">
+    {{- if $hasIntro }}
     <div class="course-intro">
       {{- with strings.TrimSpace $intro }}<div class="prose">{{ . | safeHTML }}</div>{{ end }}
       {{- with $first }}
       <p class="course-actions"><a class="btn btn--action" href="{{ .episode.RelPermalink }}">Start with lesson {{ .n }}</a></p>
       {{- end }}
     </div>
+    {{- end }}
 
     <section class="course-outline" aria-labelledby="outline-h">
       <h2 id="outline-h" class="eyebrow">The form</h2>
