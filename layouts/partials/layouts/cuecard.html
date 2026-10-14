@@ -47,13 +47,17 @@
 <article class="cuecard-page h-entry">
   <div class="wrap">
     <header class="cuecard-head">
-      <p class="eyebrow">Cue card{{ with $episode }} · <a href="{{ .course.RelPermalink }}">{{ .course.Title }}</a>{{ end }}</p>
+      {{- /* the card itself already says "Cue card"; above it, only the way back
+             to its course, when it has one */}}
+      {{- with $episode }}<p class="eyebrow">Cue card · <a href="{{ .course.RelPermalink }}">{{ .course.Title }}</a></p>{{ end }}
       <a class="u-url u-uid" href="{{ .Permalink }}" hidden><time class="dt-published" datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}"></time></a>
     </header>
 
     <div class="cuecard">
       <div class="cuecard-pic">
-        {{- with $img }}<img src="{{ .src }}" alt="{{ .alt }}">{{ end }}
+        {{- /* the picture space is a tall 2:3; the frame hugs whatever shape the
+               photo is, so a square one sits centred instead of in an empty box */}}
+        {{- with $img }}<div class="cuecard-frame"><img src="{{ .src }}" alt="{{ .alt }}"></div>{{ end }}
         {{- with $credit }}<p class="cuecard-credit">{{ . | safeHTML }}</p>{{ end }}
       </div>
       <div class="cuecard-text">
@@ -64,7 +68,13 @@
         <p class="cuecard-label">This week at home</p>
         <div class="cuecard-drill e-content">{{ $drill | safeHTML }}</div>
         <div class="cuecard-foot">
-          <span class="cuecard-mark">{{ partial "seal.html" (dict "size" 30 "flat" true) }}<span>{{ site.Params.wordmark | default site.Title }}</span></span>
+          <span class="cuecard-mark">
+            {{- partial "seal.html" (dict "size" 30 "flat" true) -}}
+            <span class="cuecard-mark-text">
+              <span class="cuecard-mark-main">{{ site.Params.wordmark | default site.Title }}</span>
+              {{- with site.Params.wordmark_sub }}<span class="cuecard-mark-sub">{{ . }}</span>{{ end -}}
+            </span>
+          </span>
           {{- with partial "page-by-title.html" "Start Here" }}<span class="cuecard-url">{{ replaceRE `^https?://(www\.)?` "" (strings.TrimSuffix "/" .Permalink) }}</span>{{ end }}
         </div>
       </div>
