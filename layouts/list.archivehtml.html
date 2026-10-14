@@ -1,0 +1,4 @@
+{{- /* /archive/ (the home page's ArchiveHTML output on Micro.blog). Same file
+       name as the blank theme's, so ours replaces it. */ -}}
+{{ define "title" }}Archive &middot; {{ site.Title }}{{ end }}
+{{ define "main" }}{{ partial "archive-main.html" . }}{{ end }}
