@@ -665,6 +665,31 @@ h3 { font-size: 1.9rem; line-height: 1.05; }
 .older { margin-top: 4rem; }
 .older-list { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; gap: 0.6rem; font-size: 1.0625rem; }
 
+/* ---------- archive and photos ---------- */
+
+.archive-year + .archive-year { margin-top: 3rem; }
+.archive-year-head { font-size: 2rem; padding-bottom: 0.5rem; margin-bottom: 0.5rem; border-bottom: 1px solid var(--faint); }
+.archive-list { list-style: none; margin: 0; padding: 0; }
+.archive-list li {
+  display: grid; grid-template-columns: 4.5rem minmax(0, 1fr); gap: 0 1rem;
+  padding: 0.7rem 0; border-bottom: 1px solid var(--faint);
+}
+.archive-date { font-size: 0.9375rem; color: var(--wash); padding-top: 0.15rem; }
+.archive-what { display: grid; gap: 0.15rem; min-width: 0; }
+.archive-what a { font: 400 1.125rem/1.4 var(--reading); text-decoration: none; }
+.archive-what a:hover { text-decoration: underline; }
+.archive-what .p-name { font: 600 1.35rem/1.15 var(--display); }
+.archive-kind { font-size: 0.8125rem; color: var(--wash); }
+
+.photo-grid {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fill, minmax(min(45%, 12rem), 1fr));
+}
+.photo-tile { display: block; aspect-ratio: 1; overflow: hidden; background: var(--shade); }
+.photo-tile img { display: block; width: 100%; height: 100%; object-fit: cover; filter: var(--tone); transition: filter 1.4s var(--taiji); }
+.photo-tile:focus-visible img { filter: none; }
+@media (hover: hover) { .photo-tile:hover img { filter: none; } }
+
 /* ---------- footer ---------- */
 
 .site-foot { border-top: 1px solid var(--faint); margin-top: 2rem; }
