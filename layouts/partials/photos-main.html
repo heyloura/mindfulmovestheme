@@ -1,0 +1,34 @@
+{{/*
+  /photos/: every post's picture (its card image, see card-image.html) as a
+  quiet grid, each linking to its post. Ink-toned like every listing, colour
+  on hover or focus, and in full colour once you open the post.
+
+  On Micro.blog this is the home page rendered in its "PhotosHTML" output, so
+  the heading just says Photos.
+*/}}
+{{- $tiles := slice -}}
+{{- range $p := partial "posts.html" . -}}
+  {{- with partial "card-image.html" $p }}{{ $tiles = $tiles | append (dict "page" $p "img" .) }}{{ end -}}
+{{- end -}}
+<section class="section">
+  <div class="wrap h-feed">
+    <header class="list-head">
+      <div class="section-title"><h1 class="p-name">Photos</h1>{{ partial "brush-rule.html" (dict) }}</div>
+      <p class="quiet">{{ len $tiles }} photo{{ if ne (len $tiles) 1 }}s{{ end }}</p>
+    </header>
+    {{- with $tiles }}
+    <ul class="photo-grid">
+      {{- range . }}
+      {{- $set := partial "photo-srcset.html" .img.src }}
+      <li class="h-entry">
+        <a class="photo-tile u-url" href="{{ .page.RelPermalink }}">
+          <img class="u-photo" src="{{ .img.src }}"{{ with $set }} srcset="{{ . }}" sizes="(max-width: 40rem) 50vw, 14rem"{{ end }} alt="{{ .img.alt | default .page.Title }}" loading="lazy" decoding="async">
+        </a>
+      </li>
+      {{- end }}
+    </ul>
+    {{- else }}
+    <p class="prose">No photos yet.</p>
+    {{- end }}
+  </div>
+</section>
