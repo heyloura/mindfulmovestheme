@@ -35,7 +35,9 @@
     <span class="bamboo-label">
       <span class="bamboo-n">{{ .n }}.</span>
       {{- with .episode }} <a href="{{ .RelPermalink }}">{{ $l.title }}</a>
-      {{- else }} <span class="bamboo-name">{{ $l.title }}</span> <span class="bamboo-status">Not filmed yet</span>
+      {{- with $l.alt }}<span class="bamboo-alt">{{ . }}</span>{{ end }}
+      {{- else }} <span class="bamboo-name">{{ $l.title }}</span>
+      {{- with $l.alt }}<span class="bamboo-alt">{{ . }}</span>{{ end }} <span class="bamboo-status">Not filmed yet</span>
       {{- end }}
     </span>
   </li>
