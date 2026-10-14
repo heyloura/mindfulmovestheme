@@ -4,9 +4,14 @@
   Input: the course page (a standing page whose title is the category name).
   Output: a slice of dicts, in outline order:
     n        lesson number (position in the list, filmed or not)
-    title    the outline line as written
-    key      the line, normalised (norm-title.html)
+    title    the move's name as written (your class name)
+    alt      its traditional name, from a trailing parenthesis, or ""
+    key      the name, normalised (title-key.html)
     episode  the episode page, or false if not filmed yet
+
+  An outline line may carry a traditional name in parentheses at the end:
+    "Energy ball right to ward off left (Grasp the Sparrow's Tail: Ward Off Left)"
+  It's shown smaller beneath the name and plays no part in matching.
 
   The outline is the FIRST numbered list on the course page. A line finds its
   episode in one of two ways:
@@ -31,8 +36,8 @@
     {{- $inner := index . 1 -}}
     {{- $href := "" -}}
     {{- with findRESubmatch `href="([^"]+)"` $inner 1 }}{{ $href = htmlUnescape (index (index . 0) 1) }}{{ end -}}
-    {{- $text := $inner | plainify | htmlUnescape | strings.TrimSpace -}}
-    {{- $items = $items | append (dict "text" $text "key" (partial "norm-title.html" $text) "href" $href) -}}
+    {{- $name := partial "split-name.html" ($inner | plainify | htmlUnescape) -}}
+    {{- $items = $items | append (dict "text" $name.main "alt" $name.alt "key" (partial "norm-title.html" $name.main) "href" $href) -}}
   {{- end -}}
 {{- end -}}
 
@@ -42,7 +47,7 @@
   {{- $inCourse := false -}}
   {{- range .Params.categories }}{{ if eq (partial "norm-title.html" .) $courseKey }}{{ $inCourse = true }}{{ end }}{{ end -}}
   {{- if and $inCourse .Title -}}
-    {{- $t := partial "norm-title.html" .Title -}}
+    {{- $t := partial "title-key.html" .Title -}}
     {{- if not (index $byTitle $t) }}{{ $byTitle = merge $byTitle (dict $t .) }}{{ end -}}
   {{- end -}}
 {{- end -}}
@@ -56,6 +61,6 @@
     {{- with partial "href-to-rel.html" . }}{{ with index $urls . }}{{ $ep = . }}{{ end }}{{ end -}}
   {{- end -}}
   {{- if not $ep }}{{ with index $byTitle $it.key }}{{ $ep = . }}{{ end }}{{ end -}}
-  {{- $lessons = $lessons | append (dict "n" (add $i 1) "title" $it.text "key" $it.key "episode" $ep) -}}
+  {{- $lessons = $lessons | append (dict "n" (add $i 1) "title" $it.text "alt" $it.alt "key" $it.key "episode" $ep) -}}
 {{- end -}}
 {{- return $lessons -}}
