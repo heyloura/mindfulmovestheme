@@ -88,6 +88,11 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
+/* hidden means hidden, whatever display a component sets for itself. Without
+   this, any element styled display: grid/flex ignores the hidden attribute the
+   scripts use (the progress question showed even after it was answered). */
+[hidden] { display: none !important; }
+
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
 body {
