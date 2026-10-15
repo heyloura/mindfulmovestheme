@@ -17,16 +17,18 @@
 {{- $k := partialCached "post-kind.html" $p $p.RelPermalink -}}
 {{- $img := partial "card-image.html" $p -}}
 {{- $isEp := eq $k.kind "episode" -}}
+{{- /* not every lesson is a video: the play mark only when the post has one */ -}}
+{{- $hasVideo := findRE `<(iframe|video)\b` (string $p.Content) 1 -}}
 <article class="card card--{{ $k.kind }}{{ if not $img }} card--text{{ end }} h-entry">
   {{- with $img }}
   {{- $set := partial "photo-srcset.html" .src }}
-  <div class="card-img{{ if $isEp }} card-img--play{{ end }}">
+  <div class="card-img{{ if and $isEp $hasVideo }} card-img--play{{ end }}">
     <img src="{{ .src }}"{{ with $set }} srcset="{{ . }}" sizes="(max-width: 40rem) calc(100vw - 2rem), 24rem"{{ end }} alt="{{ .alt }}" loading="lazy" decoding="async">
   </div>
   {{- end }}
 
   <p class="eyebrow card-eyebrow">
-    {{- if $isEp }}Episode · <span class="p-category">{{ $k.course.Title }}</span>
+    {{- if $isEp }}<span class="p-category">{{ $k.course.Title }}</span> · Lesson {{ $k.episode.lesson.n }}
     {{- else if eq $k.kind "deep-dive" }}Deep dive · <span class="p-category">{{ $k.course.Title }}</span>
     {{- else if eq $k.kind "cue-card" }}Cue card
     {{- else }}{{ range $i, $c := ($p.Params.categories | default slice) }}{{ if $i }} · {{ end }}<span class="p-category">{{ $c }}</span>{{ end }}{{ end -}}
@@ -43,10 +45,9 @@
   </p>
   {{- end }}
 
-  <p class="card-meta">
-    {{- if $isEp }}Lesson {{ $k.episode.lesson.n }}
-    {{- else }}<time class="dt-published" datetime="{{ $p.Date.Format "2006-01-02T15:04:05Z07:00" }}">{{ $p.Date.Format "2 January 2006" }}</time>{{ if ge $p.ReadingTime 3 }} · {{ $p.ReadingTime }} min read{{ end }}
-    {{- end -}}
-  </p>
-  {{- if $isEp }}<time class="dt-published" datetime="{{ $p.Date.Format "2006-01-02T15:04:05Z07:00" }}" hidden></time>{{ end }}
+  {{- if $isEp }}
+  <time class="dt-published" datetime="{{ $p.Date.Format "2006-01-02T15:04:05Z07:00" }}" hidden></time>
+  {{- else }}
+  <p class="card-meta"><time class="dt-published" datetime="{{ $p.Date.Format "2006-01-02T15:04:05Z07:00" }}">{{ $p.Date.Format "2 January 2006" }}</time>{{ if ge $p.ReadingTime 3 }} · {{ $p.ReadingTime }} min read{{ end }}</p>
+  {{- end }}
 </article>
