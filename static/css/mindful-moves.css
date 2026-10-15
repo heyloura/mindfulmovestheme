@@ -492,11 +492,15 @@ h3 { font-size: 1.9rem; line-height: 1.05; }
   position: relative; display: grid; grid-template-columns: 48px minmax(0, 1fr);
   align-items: center; column-gap: 0.6rem; min-height: 52px; padding-right: 0.5rem; border-radius: 2px;
 }
-.bamboo-seg { display: block; width: 48px; height: 52px; overflow: visible; align-self: start; }
+/* the segment column stretches with the line; the body fills it, the cap
+   (joint and leaf) sits at the top */
+.bamboo-seg { position: relative; align-self: stretch; width: 48px; min-height: 52px; }
+.bamboo-body { position: absolute; left: 26px; top: 4px; width: 12px; height: calc(100% - 7px); }
+.bamboo-cap { position: absolute; left: 0; top: 0; overflow: visible; }
 .bamboo-node { fill: none; stroke: var(--ink); stroke-width: 2.4; stroke-linecap: round; }
 .is-unfilmed .bamboo-node { stroke: var(--faint-line); }
 .bamboo-fill { fill: var(--ink); fill-opacity: 0.84; }
-.bamboo-outline { fill: none; stroke: var(--faint-line); stroke-width: 1.5; stroke-dasharray: 3 3; }
+.bamboo-outline { box-sizing: border-box; border: 1.5px dashed var(--faint-line); border-radius: 3px; }
 .bamboo-leaf { opacity: 0; transition: opacity 1.2s var(--taiji); }
 .bamboo-leaf path { fill: var(--ink); fill-opacity: 0.86; }
 .is-practiced .bamboo-leaf { opacity: 1; }
