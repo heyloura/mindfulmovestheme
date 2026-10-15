@@ -373,8 +373,12 @@
    *
    * Stored under one key, and only after the reader taps "Keep my progress":
    *   mm-progress = { v: 1, courses: { "/yang-8": ["/2026/08/24/opening.html", …] } }
-   * The key existing IS the opt-in. "No thanks" stores nothing, and "Forget my
-   * progress" removes the key, which also withdraws the opt-in.
+   * The key existing IS the opt-in.
+   *
+   * "No thanks" stores only that answer (mm-progress-off = "1"), so the
+   * question doesn't come back; a quiet "Keep track of my progress" link
+   * stays for a change of mind. "Forget my progress" removes both keys, back
+   * to never having been asked.
    *
    * Leaves are drawn on every stalk on the page: the sidebar, the phone
    * drawer's sideways stalk, and the course page. When every line of an
@@ -389,6 +393,16 @@
   };
   var saveProgress = function (p) {
     try { localStorage.setItem(PKEY, JSON.stringify(p)); return true; } catch (e) { return false; }
+  };
+  var OFFKEY = 'mm-progress-off';
+  var declined = function () {
+    try { return localStorage.getItem(OFFKEY) === '1'; } catch (e) { return false; }
+  };
+  var setDeclined = function (on) {
+    try {
+      if (on) localStorage.setItem(OFFKEY, '1');
+      else localStorage.removeItem(OFFKEY);
+    } catch (e) {}
   };
 
   var drawProgress = function () {
@@ -428,14 +442,32 @@
     Array.prototype.forEach.call(document.querySelectorAll('[data-practice-forget]'), function (f) {
       f.hidden = !p;
     });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-practice-optin]'), function (f) {
+      f.hidden = !!p || !declined();
+    });
   };
 
   Array.prototype.forEach.call(document.querySelectorAll('[data-practice-forget] button'), function (b) {
     b.addEventListener('click', function () {
       if (!window.confirm('Forget your progress? Your leaves are only kept in this browser, so this can’t be undone.')) return;
       try { localStorage.removeItem(PKEY); } catch (e) {}
+      setDeclined(false);
       drawProgress();
       syncPractice();
+    });
+  });
+
+  // a change of mind after "No thanks": progress on, leaves from the next tap
+  Array.prototype.forEach.call(document.querySelectorAll('[data-practice-optin] button'), function (b) {
+    b.addEventListener('click', function () {
+      setDeclined(false);
+      saveProgress(loadProgress() || { v: 1, courses: {} });
+      drawProgress();
+      syncPractice();
+      var status = document.querySelector('[data-practice-status]');
+      if (status) status.textContent = 'Progress is on. Tap I practiced this to grow a leaf.';
+      var btn = document.querySelector('[data-practice-btn]');
+      if (btn) btn.focus();
     });
   });
 
@@ -481,6 +513,9 @@
         var on = !isPracticed();
         setPracticed(on);
         pStatus.textContent = on ? 'A leaf grew on your bamboo.' : 'Leaf taken back.';
+      } else if (declined()) {
+        // they said no thanks: just the count, no question
+        pStatus.textContent = '';
       } else {
         pStatus.textContent = '';
         pAsk.hidden = false;
@@ -490,6 +525,7 @@
     });
     pAsk.querySelector('[data-practice-keep]').addEventListener('click', function () {
       pAsk.hidden = true;
+      setDeclined(false);
       if (saveProgress(loadProgress() || { v: 1, courses: {} })) {
         setPracticed(true);
         pStatus.textContent = 'A leaf grew on your bamboo.';
@@ -501,7 +537,9 @@
     });
     pAsk.querySelector('[data-practice-no]').addEventListener('click', function () {
       pAsk.hidden = true;
-      pStatus.textContent = 'Counted. Thanks for practicing.';
+      setDeclined(true);
+      pStatus.textContent = '';
+      drawProgress();
       pBtn.focus();
     });
 
