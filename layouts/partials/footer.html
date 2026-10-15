@@ -35,7 +35,7 @@
     </nav>
   </div>
 </footer>
-<script src="{{ "js/ui.js" | relURL }}" defer></script>
+<script src="{{ "js/ui.js" | relURL }}?v={{ now.Unix }}" defer></script>
 {{- range site.Params.plugins_js }}
 <script src="{{ . }}" defer></script>
 {{- end }}
