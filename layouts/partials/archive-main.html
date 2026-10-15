@@ -34,7 +34,7 @@
               {{- with .Title }}<span class="p-name">{{ . }}</span>{{ else }}<span class="p-summary">{{ .Summary | plainify | htmlUnescape | truncate 90 }}</span>{{ end -}}
             </a>
             <span class="archive-kind">
-              {{- if eq $k.kind "episode" }}Episode · {{ $k.course.Title }} · Lesson {{ $k.episode.lesson.n }}
+              {{- if eq $k.kind "episode" }}{{ $k.course.Title }} · Lesson {{ $k.episode.lesson.n }}
               {{- else if eq $k.kind "deep-dive" }}Deep dive · {{ $k.course.Title }}
               {{- else if eq $k.kind "cue-card" }}Cue card
               {{- else }}{{ delimit (.Params.categories | default slice) " · " }}{{ end -}}
