@@ -7,8 +7,10 @@
      it sits hidden here, our button taps it, and ui.js reads its count back.
      No Tinylytics code set, no count; the button still works.
   2. A leaf on this reader's bamboo, but only once they've said yes. The
-     first tap asks; nothing is stored in their browser before "Keep my
-     progress", and "No thanks" stores nothing at all.
+     first tap asks; nothing about practice is stored before "Keep my
+     progress". "No thanks" stores only that answer, so the question doesn't
+     come back; a quiet "Keep track of my progress" link stays for a change
+     of mind. "Forget my progress" clears both.
 
   Scripts only: without them this does nothing, so it isn't shown.
 
@@ -29,6 +31,7 @@
     </p>
   </div>
   <p class="practice-forget" data-practice-forget hidden><button class="btn-link" type="button">Forget my progress</button></p>
+  <p class="practice-forget" data-practice-optin hidden><button class="btn-link" type="button">Keep track of my progress</button></p>
   {{- if site.Params.tinylytics }}
   <button class="tinylytics_kudos practice-kudos" type="button" tabindex="-1" aria-hidden="true" data-path="{{ $p.RelPermalink }}"></button>
   {{- end }}
