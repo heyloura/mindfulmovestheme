@@ -34,7 +34,7 @@
         <div class="side-head">
           <p class="eyebrow">Course{{ with $family }} · {{ . }}{{ end }}</p>
           <p class="side-course"><a href="{{ $course.RelPermalink }}">{{ $course.Title }}</a></p>
-          <p class="side-count">{{ $ep.released }} video{{ if ne $ep.released 1 }}s{{ end }}</p>
+          <p class="side-count">{{ $ep.released }} lesson{{ if ne $ep.released 1 }}s{{ end }}</p>
           {{ partial "course-complete.html" $course }}
         </div>
         {{ partial "bamboo.html" (dict "lessons" $ep.lessons "current" $ep.lesson.n "course" $course) }}
@@ -45,9 +45,11 @@
   <article class="episode-main h-entry">
     <header class="episode-head">
       <p class="eyebrow"><a class="p-category" href="{{ $course.RelPermalink }}">{{ $course.Title }}</a> · Lesson {{ $ep.lesson.n }}</p>
-      <h1 class="p-name">{{ .Title }}</h1>
-      {{- /* the traditional name, from the course outline's parenthesis */}}
-      {{- with $ep.lesson.alt }}<p class="episode-alt">{{ . }}</p>{{ end }}
+      {{- /* the traditional name, from the course outline's parenthesis (or the
+             post's own title, if it carries one), shown once beneath the name */}}
+      {{- $name := partial "split-name.html" .Title }}
+      <h1 class="p-name">{{ $name.main }}</h1>
+      {{- with $ep.lesson.alt | default $name.alt }}<p class="episode-alt">{{ . }}</p>{{ end }}
       <a class="u-url u-uid" href="{{ .Permalink }}" hidden><time class="dt-published" datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}"></time></a>
     </header>
 
