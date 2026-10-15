@@ -20,18 +20,23 @@
   {{- range .lessons }}
   {{- $l := . }}
   <li class="bamboo-line {{ if .episode }}is-filmed{{ else }}is-unfilmed{{ end }}"{{ if eq .n $cur }} aria-current="step"{{ end }}{{ with .episode }} data-lesson="{{ partial "href-to-rel.html" .RelPermalink }}"{{ end }}>
-    <svg class="bamboo-seg" viewBox="0 0 48 52" width="48" height="52" aria-hidden="true" focusable="false">
-      <path class="bamboo-node" d="M22 1.5Q32 5.5 42 1.5"/>
+    {{- /* The segment stretches to the line's height (a name, its traditional
+           name and a status can make a line two or three rows tall), so the
+           stalk stays unbroken. The joint and leaf are a fixed cap on top. */}}
+    <span class="bamboo-seg" aria-hidden="true">
       {{- if .episode }}
-      <rect class="bamboo-fill" x="26" y="4" width="12" height="45" rx="3" filter="url(#mm-dry)"/>
+      <svg class="bamboo-body" viewBox="0 0 12 100" preserveAspectRatio="none" focusable="false"><rect class="bamboo-fill" width="12" height="100" rx="3" filter="url(#mm-dry)"/></svg>
       {{- else }}
-      <rect class="bamboo-outline" x="26.75" y="4.75" width="10.5" height="43.5" rx="3"/>
+      <span class="bamboo-body bamboo-outline"></span>
       {{- end }}
-      <g class="bamboo-leaf">
-        <path transform="translate(26 6) rotate(158) scale(.38)" d="M0 0C18-8 46-9 70-3 46 1 20 4 0 0Z" filter="url(#mm-rough)"/>
-        <path transform="translate(26 7) rotate(194) scale(.3)" d="M0 0C18-8 46-9 70-3 46 1 20 4 0 0Z" filter="url(#mm-rough)"/>
-      </g>
-    </svg>
+      <svg class="bamboo-cap" viewBox="0 0 48 16" width="48" height="16" focusable="false">
+        <path class="bamboo-node" d="M22 1.5Q32 5.5 42 1.5"/>
+        <g class="bamboo-leaf">
+          <path transform="translate(26 6) rotate(158) scale(.38)" d="M0 0C18-8 46-9 70-3 46 1 20 4 0 0Z" filter="url(#mm-rough)"/>
+          <path transform="translate(26 7) rotate(194) scale(.3)" d="M0 0C18-8 46-9 70-3 46 1 20 4 0 0Z" filter="url(#mm-rough)"/>
+        </g>
+      </svg>
+    </span>
     <span class="bamboo-label">
       <span class="bamboo-n">{{ .n }}.</span>
       {{- with .episode }} <a href="{{ .RelPermalink }}">{{ $l.title }}</a>
