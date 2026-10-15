@@ -1,11 +1,14 @@
-{{/* The posts shown in listings (home "New", the Blog page): every post
-     except cue cards, newest first.
+{{/* The posts shown in listings (home "New", the Blog page): your writing,
+     newest first. Two kinds are left out, each with its own home:
 
-     Cue cards arrive most weeks at class pace and would crowd the writing out
-     of both. They have their own home instead: the Cue Cards category page
-     (the deck, linked from the Blog page's filters) and each episode's "Print
-     the cue card". They still go out in the newsletter, the feed and the
-     archive, since Micro.blog sends every post and students want them.
+       lessons     live in their course: the course page's outline, the
+                   lesson sidebar, and the course's category page
+       cue cards   arrive most weeks at class pace; their home is the Cue
+                   Cards category page (the deck) and each lesson's "Print
+                   the cue card"
+
+     Both still go out in the newsletter, the feed and the archive, since
+     Micro.blog sends every post and students want them.
 
      Anything that needs ALL posts (course outlines, cue card pairing, Go
      deeper) uses posts.html instead.
@@ -13,6 +16,7 @@
      Usage:  {{ $posts := partial "listed-posts.html" . }}  */}}
 {{- $out := slice -}}
 {{- range partial "posts.html" . -}}
-  {{- if ne (partialCached "post-kind.html" . .RelPermalink).kind "cue-card" }}{{ $out = $out | append . }}{{ end -}}
+  {{- $kind := (partialCached "post-kind.html" . .RelPermalink).kind -}}
+  {{- if not (in (slice "episode" "cue-card") $kind) }}{{ $out = $out | append . }}{{ end -}}
 {{- end -}}
 {{- return $out -}}
