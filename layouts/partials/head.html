@@ -35,7 +35,11 @@
      two faces every page needs above the fold are preloaded. */}}
 <link rel="preload" href="{{ "fonts/atkinson-hyperlegible-latin-400-normal.woff2" | relURL }}" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="{{ "fonts/cormorant-garamond-latin-600-normal.woff2" | relURL }}" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="{{ "css/mindful-moves.css" | relURL }}">
+{{- /* ?v= is the build time. Micro.blog serves these files without caching
+       instructions, so browsers guess how long to keep them and can show an
+       old stylesheet after a theme update. A new build means a new address,
+       so every update is picked up straight away. */}}
+<link rel="stylesheet" href="{{ "css/mindful-moves.css" | relURL }}?v={{ now.Unix }}">
 
 {{ partial "microblog_head.html" . }}
 
