@@ -41,12 +41,19 @@
   {{- end -}}
 {{- end -}}
 
-{{- /* 2. the course's posts by normalised title, earliest first */ -}}
+{{- /* 2. the course's posts by normalised title, earliest first. Cue cards are
+       never lessons, even when they carry the course's category (as a card
+       for a move that's in two courses should) and share the lesson's title. */ -}}
 {{- $byTitle := dict -}}
 {{- range sort (partial "posts.html" .) "Date" "asc" -}}
   {{- $inCourse := false -}}
-  {{- range .Params.categories }}{{ if eq (partial "norm-title.html" .) $courseKey }}{{ $inCourse = true }}{{ end }}{{ end -}}
-  {{- if and $inCourse .Title -}}
+  {{- $isCueCard := false -}}
+  {{- range .Params.categories -}}
+    {{- $c := partial "norm-title.html" . -}}
+    {{- if eq $c $courseKey }}{{ $inCourse = true }}{{ end -}}
+    {{- if eq $c "cue cards" }}{{ $isCueCard = true }}{{ end -}}
+  {{- end -}}
+  {{- if and $inCourse (not $isCueCard) .Title -}}
     {{- $t := partial "title-key.html" .Title -}}
     {{- if not (index $byTitle $t) }}{{ $byTitle = merge $byTitle (dict $t .) }}{{ end -}}
   {{- end -}}
