@@ -35,8 +35,9 @@
   </p>
 
   {{- if $p.Title }}
-  {{- /* a lesson's card shows its name without the traditional name in parentheses */}}
-  <h3 class="card-title"><a class="card-link u-url p-name" href="{{ $p.RelPermalink }}">{{ if $isEp }}{{ (partial "split-name.html" $p.Title).main }}{{ else }}{{ $p.Title }}{{ end }}</a></h3>
+  {{- /* lessons and cue cards show the move's name without the traditional
+         name in parentheses */}}
+  <h3 class="card-title"><a class="card-link u-url p-name" href="{{ $p.RelPermalink }}">{{ if or $isEp (eq $k.kind "cue-card") }}{{ (partial "split-name.html" $p.Title).main }}{{ else }}{{ $p.Title }}{{ end }}</a></h3>
   {{- end }}
 
   {{- if or (not $img) (not $p.Title) }}
