@@ -108,6 +108,107 @@
     if (desk.addEventListener) desk.addEventListener('change', fit);
   }
 
+  /* ---- streaming video where the browser can't play it itself ----
+   *
+   * Micro.blog turns an uploaded video into a streaming playlist (.m3u8).
+   * Safari, iPhones, Android and Chrome/Edge 142+ play those natively; desktop
+   * Firefox and older Chrome need hls.js to play the same playlist.
+   *
+   * Micro.blog's "Video streaming" plug-in (installed automatically with a
+   * first video upload) also does this, but starts downloading every video,
+   * the hero loop included, the moment the page opens. So the theme does it
+   * instead, and lets the plug-in stand by:
+   *   - this script runs before the plug-in's, and takes each playlist this
+   *     browser can't play (the address moves to data-stream), so the plug-in
+   *     finds nothing to do;
+   *   - if the plug-in's hls.js is on the page, that copy is used; if not,
+   *     the theme's own (js/vendor/hls.light.min.js, Apache-2.0, LICENSE
+   *     beside it), fetched only by browsers that need it, only on a page
+   *     that has such a video.
+   *
+   * Until the reader presses play, only the playlist's short table of
+   * contents is read; the video itself waits, as preload="metadata" would.
+   * capLevelToPlayerSize keeps a small player from fetching 1080p.
+   */
+  var HLS_TYPE = 'application/vnd.apple.mpegurl';
+  var HLS_JS = 'vendor/hls.light.min.js?v=1.7.3';
+  var uiScript = document.currentScript || document.querySelector('script[src*="ui.js"]');
+  var canStream = !!(window.MediaSource || window.ManagedMediaSource) && typeof Promise === 'function';
+
+  // where a <video> gets its source: itself, or its first <source>
+  var sourceEl = function (video) {
+    return video.hasAttribute('src') ? video : video.querySelector('source[src]');
+  };
+  var needsHls = function (video) {
+    var el = sourceEl(video);
+    if (!el) return false;
+    var isPlaylist = /\.m3u8(\?|#|$)/i.test(el.getAttribute('src')) || /mpegurl/i.test(el.getAttribute('type') || '');
+    return isPlaylist && !video.canPlayType(HLS_TYPE);
+  };
+  var claim = function (video) {
+    var el = sourceEl(video);
+    video.setAttribute('data-stream', el.getAttribute('src'));
+    el.removeAttribute('src');
+  };
+
+  var hlsLib = null;
+  var loadHls = function () {
+    if (!hlsLib) hlsLib = new Promise(function (resolve, reject) {
+      // wait for the page's other deferred scripts, so a plug-in's copy is there
+      // to find. (A deferred script runs while readyState is already
+      // "interactive", so only "complete" means they've all run.)
+      var looked = false;
+      var find = function () {
+        if (looked) return;
+        looked = true;
+        if (window.Hls) { resolve(window.Hls); return; }
+        var s = document.createElement('script');
+        s.src = new URL(HLS_JS, uiScript ? uiScript.src : location.href).href;
+        s.onload = function () { if (window.Hls) resolve(window.Hls); else reject(new Error('hls.js')); };
+        s.onerror = function () { reject(new Error('hls.js')); };
+        document.head.appendChild(s);
+      };
+      if (document.readyState === 'complete') find();
+      else {
+        document.addEventListener('DOMContentLoaded', find);
+        window.addEventListener('load', find);
+      }
+    });
+    return hlsLib;
+  };
+
+  // hls.js on a claimed <video>, once; resolves when attached, rejects if it can't be
+  var stream = function (video) {
+    if (!video.mmStream) video.mmStream = loadHls().then(function (Hls) {
+      if (!Hls.isSupported()) throw new Error('hls.js unsupported');
+      var hls = new Hls({ autoStartLoad: false, capLevelToPlayerSize: true });
+      var parsed = false, wanted = false, recovered = false;
+      var go = function () { if (parsed && wanted) hls.startLoad(); };
+      hls.on(Hls.Events.MANIFEST_PARSED, function () { parsed = true; go(); });
+      hls.on(Hls.Events.ERROR, function (e, data) {
+        // one try at getting past a decoding hiccup; network retries are hls.js's own
+        if (data.fatal && data.type === Hls.ErrorTypes.MEDIA_ERROR && !recovered) {
+          recovered = true;
+          hls.recoverMediaError();
+        }
+      });
+      video.addEventListener('play', function () { if (!wanted) { wanted = true; go(); } });
+      hls.loadSource(video.getAttribute('data-stream'));
+      hls.attachMedia(video);
+      return hls;
+    });
+    return video.mmStream;
+  };
+
+  if (canStream) {
+    Array.prototype.forEach.call(document.querySelectorAll('video'), function (v) {
+      if (!needsHls(v)) return;
+      claim(v);
+      // lesson videos get ready now; the hero only if and when it plays (below)
+      if (!v.hasAttribute('data-hero-video')) stream(v).catch(function () {});
+    });
+  }
+
   /* ---- home hero loop ----
    *
    * The <video> has no autoplay attribute. It starts here, and only when
@@ -122,12 +223,13 @@
    */
   var hero = document.querySelector('[data-hero-video]');
   // A streaming playlist (.m3u8, what Micro.blog makes of an uploaded video)
-  // plays natively in Safari and in Chrome/Edge 142+, not in desktop Firefox.
-  // If this browser says it can't play the source, the still is all there is:
-  // no download, and no play button that would do nothing.
+  // plays natively or through hls.js (above). If this browser can play the
+  // source neither way, the still is all there is: no download, and no play
+  // button that would do nothing.
   var heroSource = hero && hero.querySelector('source');
   var heroType = heroSource && heroSource.getAttribute('type');
-  if (hero && heroType && !hero.canPlayType(heroType)) hero = null;
+  var heroHls = !!hero && hero.hasAttribute('data-stream');   // claimed above
+  if (hero && !heroHls && (needsHls(hero) || heroType && !hero.canPlayType(heroType))) hero = null;
   if (hero) {
     var HKEY = 'mm-hero';
     var heroBtn = document.querySelector('[data-hero-toggle]');
@@ -153,10 +255,20 @@
     };
     var playHero = function () {
       hero.preload = 'auto';
-      var p = hero.play();
       var started = function () { heroPlaying = true; syncHero(); };
-      if (p && p.then) p.then(started, function () { heroPlaying = false; syncHero(); });
-      else started();
+      var stopped = function () { heroPlaying = false; syncHero(); };
+      var play = function () {
+        var p = hero.play();
+        if (p && p.then) p.then(started, stopped);
+        else started();
+      };
+      if (!heroHls) { play(); return; }
+      // hls.js arrives on the first play; if it can't (blocked, offline), the
+      // still stays and the button goes, since it would do nothing
+      stream(hero).then(play, function () {
+        stopped();
+        if (heroBtn) heroBtn.hidden = true;
+      });
     };
     var pauseHero = function () {
       hero.pause();
