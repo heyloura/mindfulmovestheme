@@ -36,7 +36,7 @@
   {{- if eq (partial "title-key.html" .Title) $key -}}
     {{- $k := partialCached "post-kind.html" . .RelPermalink -}}
     {{- if eq $k.kind "episode" -}}
-      {{- $hit := dict "page" . "course" $k.course "n" $k.episode.lesson.n "alt" $k.episode.lesson.alt -}}
+      {{- $hit := dict "page" . "course" $k.course "n" $k.episode.lesson.n "alt" $k.episode.lesson.alt "postAlt" (partial "split-name.html" .Title).alt -}}
       {{- if not $episode }}{{ $episode = $hit }}{{ end -}}
       {{- if and (not $preferred) (in $mine (partial "norm-title.html" $k.course.Title)) }}{{ $preferred = $hit }}{{ end -}}
     {{- end -}}
@@ -62,8 +62,14 @@
       </div>
       <div class="cuecard-text">
         <p class="eyebrow">{{ with $episode }}{{ .course.Title }} · Lesson {{ .n }}{{ else }}Cue card{{ end }}</p>
-        <h1 class="cuecard-title p-name">{{ .Title }}</h1>
-        {{- with $episode }}{{ with .alt }}<p class="cuecard-alt">{{ . }}</p>{{ end }}{{ end }}
+        {{- /* "Commencement (Wu Ji)": the name is the title, the traditional
+               name sits once beneath it. Where it comes from, first found:
+               the course outline, the card's own title, the lesson's title. */}}
+        {{- $name := partial "split-name.html" .Title }}
+        {{- $alt := $name.alt }}
+        {{- with $episode }}{{ $alt = .alt | default $alt | default .postAlt }}{{ end }}
+        <h1 class="cuecard-title p-name">{{ $name.main }}</h1>
+        {{- with $alt }}<p class="cuecard-alt">{{ . }}</p>{{ end }}
         {{- with $quote }}<blockquote class="cuecard-quote">{{ . | safeHTML }}</blockquote>{{ end }}
         {{ partial "brush-rule.html" (dict "class" "cuecard-rule") }}
         <p class="cuecard-label">This week at home</p>
