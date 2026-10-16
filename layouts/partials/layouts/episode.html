@@ -18,6 +18,10 @@
 {{- range partialCached "courses-list.html" "courses" }}{{ if and .page (eq .page.RelPermalink $course.RelPermalink) }}{{ $family = .family }}{{ end }}{{ end -}}
 {{- $body := partial "strip-card-image.html" .Content -}}
 {{- $body = partial "responsive-img.html" (dict "html" $body "sizes" "(max-width: 52rem) calc(100vw - 2rem), 52rem") -}}
+{{- /* "Ward off left (Grasping Sparrow's Tail)": the name, and the traditional
+       name from the course outline's parenthesis (or the post's own title, if
+       it carries one), shown once beneath the name */ -}}
+{{- $name := partial "split-name.html" .Title -}}
 
 <div class="wrap episode">
   <aside class="episode-side" aria-label="{{ $course.Title }} lessons">
@@ -25,7 +29,7 @@
       <summary class="drawer-summary">
         <span class="drawer-where">
           <span class="eyebrow">{{ $course.Title }} · Lesson {{ $ep.lesson.n }}</span>
-          <span class="drawer-title">{{ .Title }}</span>
+          <span class="drawer-title">{{ $name.main }}</span>
         </span>
         {{ partial "mini-stalk.html" (dict "lessons" $ep.lessons "current" $ep.lesson.n) }}
         <svg class="drawer-chevron" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -45,9 +49,6 @@
   <article class="episode-main h-entry">
     <header class="episode-head">
       <p class="eyebrow"><a class="p-category" href="{{ $course.RelPermalink }}">{{ $course.Title }}</a> · Lesson {{ $ep.lesson.n }}</p>
-      {{- /* the traditional name, from the course outline's parenthesis (or the
-             post's own title, if it carries one), shown once beneath the name */}}
-      {{- $name := partial "split-name.html" .Title }}
       <h1 class="p-name">{{ $name.main }}</h1>
       {{- with $ep.lesson.alt | default $name.alt }}<p class="episode-alt">{{ . }}</p>{{ end }}
       <a class="u-url u-uid" href="{{ .Permalink }}" hidden><time class="dt-published" datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}"></time></a>
