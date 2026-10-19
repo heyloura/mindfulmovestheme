@@ -15,7 +15,7 @@
       {{- if eq .Kind "term" }}<p class="eyebrow">Category · {{ len .Pages }} post{{ if ne (len .Pages) 1 }}s{{ end }}</p>{{ end }}
       <div class="section-title"><h1 class="p-name">{{ .Title }}</h1>{{ partial "brush-rule.html" (dict) }}</div>
       {{- with $intro }}<div class="prose">{{ . }}</div>{{ end }}
-      {{- with $course }}<p><a class="btn" href="{{ .RelPermalink }}">See the {{ .Title }} course</a></p>{{ end }}
+      {{- with $course }}<p><a class="btn" href="{{ .RelPermalink }}">See the {{ .Title }} lessons</a></p>{{ end }}
     </header>
     <div class="cards">
       {{- range .Pages.ByDate.Reverse }}{{ partial "card.html" . }}{{ end }}
