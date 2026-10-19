@@ -40,7 +40,7 @@
     <div class="entry-body prose{{ if $dated }} e-content{{ end }}">{{ $body }}</div>
 
     {{- if eq $k.kind "deep-dive" }}
-    <p class="entry-course"><a href="{{ $k.course.RelPermalink }}">From the {{ $k.course.Title }} course →</a></p>
+    <p class="entry-course"><a href="{{ $k.course.RelPermalink }}">See the {{ $k.course.Title }} lessons →</a></p>
     {{- end }}
 
     {{- if $dated }}
