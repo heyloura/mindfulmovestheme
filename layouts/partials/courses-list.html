@@ -1,8 +1,9 @@
 {{/*
-  The courses, in the order and families written on the Courses page.
+  The courses, in the order and families written on the Resources page (or
+  Courses: see courses-page.html).
 
-  The Courses page is a few headings (the families: Forms, Qigong…) each with
-  a list under it. Each line is either
+  That page is a few headings (the families: Forms, Qigong…) each with a list
+  under it. Each line is either
     - plain text: a course on this site, found by its page title, or
     - a link to another site: a members course, shown locked; put its card
       picture in the same line.
@@ -22,7 +23,7 @@
   Usage:  {{ $courses := partialCached "courses-list.html" "courses" }}
 */}}
 {{- $out := slice -}}
-{{- with partial "page-by-title.html" "Courses" -}}
+{{- with (partialCached "courses-page.html" "courses-page").page -}}
   {{- $family := "" -}}
   {{- range findRE `(?s)<h[23][^>]*>.*?</h[23]>|<li[^>]*>.*?</li>` (string .Content) -}}
     {{- if hasPrefix . "<h" -}}
