@@ -36,7 +36,7 @@
       </summary>
       <div class="drawer-body">
         <div class="side-head">
-          <p class="eyebrow">Course{{ with $family }} · {{ . }}{{ end }}</p>
+          <p class="eyebrow">{{ (partialCached "courses-page.html" "courses-page").singular }}{{ with $family }} · {{ . }}{{ end }}</p>
           <p class="side-course"><a href="{{ $course.RelPermalink }}">{{ $course.Title }}</a></p>
           <p class="side-count">{{ $ep.released }} lesson{{ if ne $ep.released 1 }}s{{ end }}</p>
           {{ partial "course-complete.html" $course }}
