@@ -1,12 +1,13 @@
 {{/*
-  The "course complete" stamp: the seal, set down at a slight angle like a
-  chop on a finished painting. Hidden until ui.js finds that this reader has
-  practiced every line of the outline (all filmed, all leaved), so it only
-  ever appears for someone who opted in to keeping their progress.
+  The "all lessons practiced" stamp: the seal, set down at a slight angle
+  like a chop on a finished painting. Hidden until ui.js finds that this
+  reader has practiced every line of the outline (all filmed, all leaved), so
+  it only ever appears for someone who opted in to keeping their progress.
+  Worded so it reads right whether the site calls these courses or resources.
 
   Usage:  {{ partial "course-complete.html" $course }}
 */}}
 <p class="course-complete" data-course-complete data-course="{{ partial "href-to-rel.html" .RelPermalink }}" hidden>
   {{ partial "seal.html" (dict "size" 56 "class" "course-complete-seal") }}
-  <span>Course complete</span>
+  <span>All lessons practiced</span>
 </p>
