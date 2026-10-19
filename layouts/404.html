@@ -8,7 +8,7 @@
       <p class="prose">This page isn’t here. It may have moved, or the link may have a typo.</p>
       <p class="lost-links">
         {{- with partial "page-by-title.html" "Start Here" }}<a class="btn btn--action" href="{{ .RelPermalink }}">Start here</a>{{ end }}
-        {{- with partial "page-by-title.html" "Courses" }}<a class="btn" href="{{ .RelPermalink }}">Courses</a>{{ end }}
+        {{- with (partialCached "courses-page.html" "courses-page").page }}<a class="btn" href="{{ .RelPermalink }}">{{ strings.TrimSpace .Title }}</a>{{ end }}
         <a class="btn" href="{{ "/" | relURL }}">Home</a>
       </p>
     </div>
