@@ -12,6 +12,7 @@
 {{- $hero := partial "home-hero.html" . -}}
 {{- $posts := partial "listed-posts.html" . -}}
 {{- $courses := partialCached "courses-list.html" "courses" -}}
+{{- $cw := partialCached "courses-page.html" "courses-page" -}}
 {{- $start := partial "page-by-title.html" "Start Here" -}}
 
 <section class="hero{{ if not (or $hero.poster $hero.video) }} hero--plain{{ end }}" aria-labelledby="hero-h">
@@ -64,8 +65,8 @@
 <section class="section section--courses" aria-labelledby="courses-h">
   <div class="wrap">
     <div class="section-head">
-      <div class="section-title"><h2 id="courses-h">Courses</h2>{{ partial "brush-rule.html" (dict) }}</div>
-      {{- with partial "page-by-title.html" "Courses" }}<a href="{{ .RelPermalink }}">All courses →</a>{{ end }}
+      <div class="section-title"><h2 id="courses-h">{{ $cw.plural }}</h2>{{ partial "brush-rule.html" (dict) }}</div>
+      {{- with $cw.page }}<a href="{{ .RelPermalink }}">All {{ lower $cw.plural }} →</a>{{ end }}
     </div>
     <div class="cards cards--courses">
       {{- range . }}{{ partial "course-card.html" . }}{{ end }}
