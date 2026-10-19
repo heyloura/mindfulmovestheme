@@ -6,7 +6,8 @@
     an episode                        → layouts/episode.html
     a cue card                        → layouts/cuecard.html
     the page titled "Blog"            → layouts/blog.html
-    the page titled "Courses"         → layouts/courses.html
+    the page titled "Resources"
+      (or "Courses")                  → layouts/courses.html
     a page with a course outline      → layouts/course.html
     everything else                   → layouts/entry.html
 
@@ -24,7 +25,7 @@
   {{ partial "layouts/cuecard.html" . }}
 {{- else if and (eq $k.kind "page") (eq $title "blog") -}}
   {{ partial "layouts/blog.html" . }}
-{{- else if and (eq $k.kind "page") (eq $title "courses") -}}
+{{- else if and (eq $k.kind "page") (in (slice "resources" "courses") $title) -}}
   {{ partial "layouts/courses.html" . }}
 {{- else if and (eq $k.kind "page") (partialCached "course-lessons.html" . .RelPermalink) -}}
   {{ partial "layouts/course.html" . }}
