@@ -1,0 +1,21 @@
+{{/*
+  The page that lists the courses, and what the site calls them.
+
+  It's the page titled "Resources" or "Courses", and its title is the word
+  readers see: "Resources", "All resources →", "Resource · Forms". Rename the
+  page in Micro.blog and the wording follows, with no theme edit. (Inside the
+  theme and its docs they're "courses" either way.)
+
+  Returns a dict:
+    page      that page, else false
+    plural    its title as you wrote it, e.g. "Resources" (no page: "Resources")
+    singular  the same without its final s, e.g. "Resource"
+
+  Usage:  {{ $cw := partialCached "courses-page.html" "courses-page" }}
+*/}}
+{{- $page := false -}}
+{{- range slice "Resources" "Courses" -}}
+  {{- if not $page }}{{ with partial "page-by-title.html" . }}{{ $page = . }}{{ end }}{{ end -}}
+{{- end -}}
+{{- $plural := "Resources" }}{{ with $page }}{{ $plural = strings.TrimSpace .Title }}{{ end -}}
+{{- return (dict "page" $page "plural" $plural "singular" (strings.TrimSuffix "s" $plural)) -}}
